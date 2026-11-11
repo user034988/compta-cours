@@ -463,7 +463,6 @@ table.amo td.has-c::after{content:"";position:absolute;top:0;right:0;border-styl
   </form>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script>
@@ -471,266 +470,878 @@ table.amo td.has-c::after{content:"";position:absolute;top:0;right:0;border-styl
 'use strict';
 
 /* ================= Plan comptable général (extrait) ================= */
-const PCG_RAW = `101|Capital
-1013|Capital souscrit - appelé, versé
-104|Primes liées au capital social
-106|Réserves
-1061|Réserve légale
-1063|Réserves statutaires ou contractuelles
-1068|Autres réserves
-108|Compte de l'exploitant
-110|Report à nouveau (solde créditeur)
-119|Report à nouveau (solde débiteur)
-120|Résultat de l'exercice (bénéfice)
-129|Résultat de l'exercice (perte)
-131|Subventions d'équipement
-139|Subventions d'investissement inscrites au compte de résultat
-151|Provisions pour risques
-155|Provisions pour impôts
-164|Emprunts auprès des établissements de crédit
-165|Dépôts et cautionnements reçus
-168|Autres emprunts et dettes assimilées
-1688|Intérêts courus sur emprunts
-201|Frais d'établissement
-203|Frais de recherche et de développement
-205|Concessions et droits similaires, brevets, licences, logiciels
-206|Droit au bail
-207|Fonds commercial
-211|Terrains
-213|Constructions
-2135|Installations générales, agencements, aménagements des constructions
-215|Installations techniques, matériel et outillage industriels
-2154|Matériel industriel
-2155|Outillage industriel
-218|Autres immobilisations corporelles
-2181|Installations générales, agencements, aménagements divers
-2182|Matériel de transport
-2183|Matériel de bureau et matériel informatique
-2184|Mobilier
-231|Immobilisations corporelles en cours
-237|Avances et acomptes versés sur immobilisations incorporelles
-238|Avances et acomptes versés sur commandes d'immobilisations corporelles
-261|Titres de participation
-271|Titres immobilisés (droit de propriété)
-274|Prêts
-275|Dépôts et cautionnements versés
-280|Amortissements des immobilisations incorporelles
-2801|Amortissements des frais d'établissement
-2805|Amortissements des concessions, brevets, licences, logiciels
-281|Amortissements des immobilisations corporelles
-2813|Amortissements des constructions
-2815|Amortissements des installations techniques, matériel et outillage
-2818|Amortissements des autres immobilisations corporelles
-28182|Amortissements du matériel de transport
-28183|Amortissements du matériel de bureau et informatique
-28184|Amortissements du mobilier
-290|Dépréciations des immobilisations incorporelles
-291|Dépréciations des immobilisations corporelles
-296|Dépréciations des participations
-297|Dépréciations des autres immobilisations financières
-31|Matières premières (et fournitures)
-32|Autres approvisionnements
-33|En-cours de production de biens
-355|Produits finis
-37|Stocks de marchandises
-391|Dépréciations des matières premières
-397|Dépréciations des stocks de marchandises
-401|Fournisseurs
-403|Fournisseurs - Effets à payer
-404|Fournisseurs d'immobilisations
-405|Fournisseurs d'immobilisations - Effets à payer
-408|Fournisseurs - Factures non parvenues
-409|Fournisseurs débiteurs
-4091|Fournisseurs - Avances et acomptes versés sur commandes
-4096|Fournisseurs - Créances pour emballages et matériel à rendre
-4097|Fournisseurs - Autres avoirs
-4098|Rabais, remises, ristournes à obtenir et autres avoirs non encore reçus
-411|Clients
-413|Clients - Effets à recevoir
-416|Clients douteux ou litigieux
-418|Clients - Produits non encore facturés
-4181|Clients - Factures à établir
-419|Clients créditeurs
-4191|Clients - Avances et acomptes reçus sur commandes
-4196|Clients - Dettes sur emballages et matériels consignés
-4198|Rabais, remises, ristournes à accorder et autres avoirs à établir
-421|Personnel - Rémunérations dues
-425|Personnel - Avances et acomptes
-427|Personnel - Oppositions
-428|Personnel - Charges à payer et produits à recevoir
-4282|Dettes provisionnées pour congés à payer
-431|Sécurité sociale
-437|Autres organismes sociaux
-438|Organismes sociaux - Charges à payer et produits à recevoir
-4386|Organismes sociaux - Autres charges à payer
-441|État - Subventions à recevoir
-4421|Prélèvements à la source (impôt sur le revenu)
-444|État - Impôts sur les bénéfices
-445|État - Taxes sur le chiffre d'affaires
-44551|TVA à décaisser
-44562|TVA déductible sur immobilisations
-44566|TVA déductible sur autres biens et services
-44567|Crédit de TVA à reporter
-44571|TVA collectée
-4458|Taxes sur le chiffre d'affaires à régulariser ou en attente
-44583|Remboursement de taxes sur le chiffre d'affaires demandé
-44586|Taxes sur le chiffre d'affaires sur factures non parvenues
-44587|Taxes sur le chiffre d'affaires sur factures à établir
-447|Autres impôts, taxes et versements assimilés
-4486|État - Charges à payer
-455|Associés - Comptes courants
-456|Associés - Opérations sur le capital
-4561|Associés - Comptes d'apport en société
-457|Associés - Dividendes à payer
-462|Créances sur cessions d'immobilisations
-464|Dettes sur acquisitions de valeurs mobilières de placement
-465|Créances sur cessions de valeurs mobilières de placement
-467|Autres comptes débiteurs ou créditeurs
-471|Compte d'attente
-476|Différences de conversion - Actif
-477|Différences de conversion - Passif
-486|Charges constatées d'avance
-487|Produits constatés d'avance
-491|Dépréciations des comptes de clients
-503|Actions
-506|Obligations
-508|Autres valeurs mobilières de placement et créances assimilées
-511|Valeurs à l'encaissement
-5112|Chèques à encaisser
-5113|Effets à l'encaissement
-5114|Effets à l'escompte
-512|Banques
-514|Chèques postaux
-5186|Intérêts courus à payer
-519|Concours bancaires courants
-530|Caisse
-580|Virements internes
-590|Dépréciations des valeurs mobilières de placement
-601|Achats stockés - Matières premières (et fournitures)
-602|Achats stockés - Autres approvisionnements
-6031|Variation des stocks de matières premières (et fournitures)
-6032|Variation des stocks des autres approvisionnements
-6037|Variation des stocks de marchandises
-604|Achats d'études et prestations de services
-605|Achats de matériel, équipements et travaux
-606|Achats non stockés de matières et fournitures
-6061|Fournitures non stockables (eau, énergie...)
-6063|Fournitures d'entretien et de petit équipement
-6064|Fournitures administratives
-6068|Autres matières et fournitures
-607|Achats de marchandises
-609|Rabais, remises et ristournes obtenus sur achats
-6091|RRR obtenus sur achats de matières premières
-6097|RRR obtenus sur achats de marchandises
-611|Sous-traitance générale
-612|Redevances de crédit-bail
-6122|Crédit-bail mobilier
-6125|Crédit-bail immobilier
-613|Locations
-6132|Locations immobilières
-6135|Locations mobilières
-614|Charges locatives et de copropriété
-615|Entretien et réparations
-6155|Entretien et réparations sur biens mobiliers
-616|Primes d'assurances
-618|Divers (documentation, séminaires...)
-6181|Documentation générale
-619|Rabais, remises et ristournes obtenus sur services extérieurs
-621|Personnel extérieur à l'entreprise
-622|Rémunérations d'intermédiaires et honoraires
-6221|Commissions et courtages sur achats
-6222|Commissions et courtages sur ventes
-6226|Honoraires
-6227|Frais d'actes et de contentieux
-623|Publicité, publications, relations publiques
-6231|Annonces et insertions
-6236|Catalogues et imprimés
-624|Transports de biens et transports collectifs du personnel
-6241|Transports sur achats
-6242|Transports sur ventes
-625|Déplacements, missions et réceptions
-6251|Voyages et déplacements
-6256|Missions
-6257|Réceptions
-626|Frais postaux et de télécommunications
-627|Services bancaires et assimilés
-628|Divers
-6281|Concours divers (cotisations...)
-629|Rabais, remises et ristournes obtenus sur autres services extérieurs
-631|Impôts, taxes et versements assimilés sur rémunérations (administration des impôts)
-6311|Taxe sur les salaires
-633|Impôts, taxes et versements assimilés sur rémunérations (autres organismes)
-6333|Participation des employeurs à la formation professionnelle continue
-635|Autres impôts, taxes et versements assimilés (administration des impôts)
-63511|Cotisation économique territoriale
-6354|Droits d'enregistrement et de timbre
-637|Autres impôts, taxes et versements assimilés (autres organismes)
-641|Rémunérations du personnel
-6411|Salaires, appointements
-6412|Congés payés
-6413|Primes et gratifications
-6414|Indemnités et avantages divers
-644|Rémunération du travail de l'exploitant
-645|Charges de sécurité sociale et de prévoyance
-6451|Cotisations à l'URSSAF
-6453|Cotisations aux caisses de retraite
-646|Cotisations sociales personnelles de l'exploitant
-647|Autres charges sociales
-648|Autres charges de personnel
-651|Redevances pour concessions, brevets, licences, logiciels, droits et valeurs similaires
-654|Pertes sur créances irrécouvrables
-658|Charges diverses de gestion courante
-661|Charges d'intérêts
-6611|Intérêts des emprunts et dettes
-6615|Intérêts des comptes courants et des dépôts créditeurs
-6616|Intérêts bancaires et sur opérations de financement
-665|Escomptes accordés
-666|Pertes de change
-667|Charges nettes sur cessions de valeurs mobilières de placement
-678|Autres charges exceptionnelles
-681|Dotations aux amortissements, dépréciations et provisions - Charges d'exploitation
-6811|Dotations aux amortissements des immobilisations incorporelles et corporelles
-6815|Dotations aux provisions d'exploitation
-6817|Dotations aux dépréciations des actifs circulants
-686|Dotations aux amortissements, dépréciations et provisions - Charges financières
-687|Dotations aux amortissements, dépréciations et provisions - Charges exceptionnelles
-691|Participation des salariés aux résultats
-695|Impôts sur les bénéfices
-701|Ventes de produits finis
-702|Ventes de produits intermédiaires
-703|Ventes de produits résiduels
-704|Travaux
-705|Études
-706|Prestations de services
-707|Ventes de marchandises
-708|Produits des activités annexes
-7085|Ports et frais accessoires facturés
-709|Rabais, remises et ristournes accordés par l'entreprise
-7091|RRR accordés sur ventes de produits finis
-7097|RRR accordés sur ventes de marchandises
-713|Variation des stocks (en-cours de production, produits)
-7135|Variation des stocks de produits
-721|Production immobilisée - Immobilisations incorporelles
-722|Production immobilisée - Immobilisations corporelles
-74|Subventions d'exploitation
-751|Redevances pour concessions, brevets, licences, logiciels, droits et valeurs similaires
-752|Revenus des immeubles non affectés aux activités professionnelles
-758|Produits divers de gestion courante
-761|Produits de participations
-762|Produits des autres immobilisations financières
-763|Revenus des autres créances
-764|Revenus des valeurs mobilières de placement
-765|Escomptes obtenus
-766|Gains de change
-767|Produits nets sur cessions de valeurs mobilières de placement
-768|Autres produits financiers
-778|Autres produits exceptionnels
-781|Reprises sur amortissements, dépréciations et provisions (produits d'exploitation)
-7815|Reprises sur provisions d'exploitation
-7817|Reprises sur dépréciations des actifs circulants
-786|Reprises sur dépréciations et provisions (produits financiers)
-787|Reprises sur dépréciations et provisions (produits exceptionnels)`;
-const PCG = PCG_RAW.split('\n').map(r => { const i = r.indexOf('|'); return { n: r.slice(0, i), l: r.slice(i + 1), src: 'pcg' }; });
+/* Plan comptable général 2026 (ANC), d'après github.com/arrhes/PCG (licence CC0).
+   m = compte du système minimal, f = facultatif, u = subdivision usuelle ajoutée pour les exercices. */
+const PCG_RAW = `1|Comptes de capitaux|m
+10|Capital et réserves|m
+101|Capital|m
+1011|Capital souscrit - non appelé|f
+1012|Capital souscrit - appelé, non versé|f
+1013|Capital souscrit - appelé, versé|f
+10131|Capital non amorti|f
+10132|Capital amorti|f
+1018|Capital souscrit soumis à des réglementations particulières|f
+102|Fonds fiduciaires|f
+104|Primes liées au capital|m
+1041|Primes d'émission|f
+1042|Primes de fusion|f
+1043|Primes d'apport|f
+1044|Primes de conversion d'obligations en actions|f
+1045|Bons de souscription de titres en capital|f
+105|Écarts de réévaluation|m
+106|Réserves|m
+1061|Réserve légale|m
+1062|Réserves indisponibles|m
+1063|Réserves statutaires ou contractuelles|m
+1064|Réserves réglementées|m
+1068|Autres réserves|m
+107|Écart d'équivalence|m
+108|Compte de l'exploitant|m
+109|Actionnaires : capital souscrit - non appelé|m
+11|Report à nouveau|m
+110|Report à nouveau - solde créditeur|m
+119|Report à nouveau - solde débiteur|m
+12|Résultat de l'exercice|m
+120|Résultat de l'exercice - bénéfice|m
+1209|Acomptes sur dividendes|f
+129|Résultat de l'exercice – perte|m
+13|Subventions d'investissement|m
+131|Subventions d'investissement octroyées|m
+139|Subventions d'investissement inscrites au compte de résultat|m
+14|Provisions réglementées|m
+143|Provisions réglementées pour hausse de prix|m
+145|Amortissements dérogatoires|m
+148|Autres provisions réglementées|m
+15|Provisions|m
+151|Provisions pour risques|m
+1511|Provisions pour litiges|f
+1512|Provisions pour garanties données aux clients|f
+1514|Provisions pour amendes et pénalités|f
+1515|Provisions pour pertes de change|f
+1516|Provisions pour pertes sur contrats|f
+1518|Autres provisions pour risques|f
+152|Provisions pour charges|m
+1521|Provisions pour pensions et obligations similaires|f
+1522|Provisions pour restructurations|f
+1523|Provisions pour impôts|f
+1524|Provisions pour renouvellement des immobilisations - entreprises concessionnaires|f
+1525|Provisions pour gros entretien ou grandes révisions|f
+1526|Provisions pour remise en état|f
+1527|Autres provisions pour charges|f
+16|Emprunts et dettes assimilées, fonds non remboursables et avances conditionnées|m
+161|Emprunts obligataires convertibles si non-inscrits dans le compte 167|m
+1618|Intérêts courus sur emprunts obligataires convertibles|f
+162|Obligations représentatives de passifs nets remis en fiducie si non-inscrites dans le compte 167|m
+163|Autres emprunts obligataires si non-inscrits dans le compte 167|m
+1638|Intérêts courus sur autres emprunts obligataires|f
+164|Emprunts auprès des établissements de crédit si non-inscrits dans le compte 167|m
+1648|Intérêts courus sur emprunts auprès des établissements de crédit|f
+165|Dépôts et cautionnements reçus|m
+1651|Dépôts|f
+1655|Cautionnements|f
+1658|Intérêts courus sur dépôts et cautionnements reçus|f
+166|Participation des salariés aux résultats|m
+1661|Comptes bloqués|f
+1662|Fonds de participation|f
+1668|Intérêts courus sur participation des salariés aux résultats|f
+167|Fonds non remboursables et avances conditionnées|m
+1671|Fonds non remboursables montant principal|m
+16711|Titres participatifs montant principal|f
+16712|Autres fonds non remboursables montant principal|f
+1673|Avances conditionnées montant principal|m
+1674|Avances conditionnées intérêts courus|m
+168|Autres emprunts et dettes assimilées|m
+1681|Autres emprunts|f
+1682|Emprunts participatifs|f
+1685|Rentes viagères capitalisées|f
+1687|Autres dettes|f
+1688|Intérêts courus sur autres emprunts et dettes assimilées|f
+169|Primes de remboursement des emprunts|m
+17|Dettes rattachées à des participations|m
+171|Dettes rattachées à des participations - groupe|f
+174|Dettes rattachées à des participations - hors groupe|f
+178|Dettes rattachées à des sociétés en participation|f
+18|Comptes de liaison des établissements et sociétés en participation|m
+181|Comptes de liaison des établissements|f
+186|Biens et prestations de services échangés entre établissements - charges|f
+187|Biens et prestations de services échangés entre établissements - produits|f
+188|Comptes de liaison des sociétés en participation|f
+2|Comptes d'immobilisations|m
+20|Immobilisations incorporelles et frais d’établissement|m
+201|Frais d'établissement|m
+2011|Frais de constitution|f
+2012|Frais de premier établissement|f
+20121|Frais de prospection|f
+20122|Frais de publicité|f
+2013|Frais d'augmentation de capital et d'opérations diverses - fusions, scissions, transformations|f
+203|Frais de développement|m
+205|Concessions et droits similaires, brevets, licences, marques, procédés, solutions informatiques, droits et valeurs similaires|m
+206|Droit au bail|m
+207|Fonds commercial|m
+208|Autres immobilisations incorporelles|m
+2081|Mali de fusion sur actifs incorporels|f
+21|Immobilisations corporelles|m
+211|Terrains|m
+2111|Terrains nus|f
+2112|Terrains aménagés|f
+2113|Sous-sols et sur-sols|f
+2114|Terrains de carrières (Tréfonds)|f
+2115|Terrains bâtis|f
+212|Agencements et aménagements de terrains (même ventilation que celle du compte 211)|m
+213|Constructions|m
+2131|Bâtiments|f
+2135|Installations générales - agencements - aménagements des constructions|f
+2138|Ouvrages d'infrastructure|f
+214|Constructions sur sol d'autrui (même ventilation que celle du compte 213)|m
+215|Installations techniques, matériels et outillages industriels|m
+2151|Installations complexes spécialisées|f
+21511|Installations complexes spécialisées sur sol propre|f
+21514|Installations complexes spécialisées sur sol d'autrui|f
+2153|Installations à caractère spécifique|f
+21531|Installations à caractère spécifique sur sol propre|f
+21534|Installations à caractère spécifique sur sol d'autrui|f
+2154|Matériels industriels|f
+2155|Outillages industriels|f
+2157|Agencements et aménagements des matériels et outillages industriels|f
+218|Autres immobilisations corporelles|m
+2181|Installations générales, agencements, aménagements divers|f
+2182|Matériel de transport|f
+2183|Matériel de bureau et matériel informatique|f
+2184|Mobilier|f
+2185|Cheptel|f
+2186|Emballages récupérables|f
+2187|Mali de fusion sur actifs corporels|f
+22|Immobilisations mises en concession|m
+229|Droits du concédant (présentés dans la rubrique autres fonds propres)|m
+23|Immobilisations en cours, avances et acomptes|m
+231|Immobilisations corporelles en cours|m
+232|Immobilisations incorporelles en cours|m
+237|Avances et acomptes versés sur commandes d'immobilisations incorporelles|m
+238|Avances et acomptes versés sur commandes d'immobilisations corporelles|m
+26|Participations et créances rattachées à des participations|m
+261|Titres de participation|m
+2611|Actions|f
+2618|Autres titres|f
+262|Titres évalués par équivalence|m
+266|Autres formes de participation|m
+2661|Droits représentatifs d'actifs nets remis en fiducie|f
+267|Créances rattachées à des participations|m
+2671|Créances rattachées à des participations - groupe|f
+2674|Créances rattachées à des participations - hors groupe|f
+2675|Versements représentatifs d'apports non capitalisés - appel de fonds|f
+2676|Avances consolidables|f
+2677|Autres créances rattachées à des participations|f
+2678|Intérêts courus|f
+268|Créances rattachées à des sociétés en participation|m
+2681|Principal|f
+2688|Intérêts courus|f
+269|Versements restant à effectuer sur titres de participation non libérés|m
+27|Autres immobilisations financières|m
+271|Titres immobilisés autres que les titres immobilisés de l'activité de portefeuille (droit de propriété)|m
+2711|Actions|f
+2718|Autres titres|f
+272|Titres immobilisés (droit de créance)|m
+2721|Obligations|f
+2722|Bons|f
+273|Titres immobilisés de l'activité de portefeuille|m
+274|Prêts|m
+2741|Prêts participatifs|f
+2742|Prêts aux associés|f
+2743|Prêts au personnel|f
+2748|Autres prêts|f
+275|Dépôts et cautionnements versés|m
+2751|Dépôts|f
+2755|Cautionnements|f
+276|Autres créances immobilisées|m
+2761|Créances diverses|m
+2768|Intérêts courus|m
+27682|Intérêts courus sur titres immobilisés (droit de créance)|m
+27684|Intérêts courus sur prêts|m
+27685|Intérêts courus sur dépôts et cautionnements|m
+27688|Intérêts courus sur créances diverses|m
+277|Actions propres ou parts propres|m
+2771|Actions propres ou parts propres|f
+2772|Actions propres ou parts propres en voie d’annulation|f
+278|Mali de fusion sur actifs financiers|f
+279|Versements restant à effectuer sur titres immobilisés non libérés|m
+28|Amortissements des immobilisations|m
+280|Amortissements des immobilisations incorporelles et des frais d’établissement (même ventilation que celle du compte 20)|m
+2801|Frais d'établissement (même ventilation que celle du compte 201)|m
+2803|Frais de développement|m
+2805|Concessions et droits similaires, brevets, licences, solutions informatiques, droits et valeurs similaires|m
+2806|Droit au bail|m
+2807|Fonds commercial|m
+2808|Autres immobilisations incorporelles|m
+281|Amortissements des immobilisations corporelles (même ventilation que celle du compte 21)|m
+2812|Agencements, aménagements de terrains (même ventilation que celle du compte 212)|m
+2813|Constructions (même ventilation que celle du compte 213)|m
+2814|Constructions sur sol d'autrui (même ventilation que celle du compte 214)|m
+2815|Installations, matériel et outillage industriels (même ventilation que celle du compte 215)|m
+2818|Autres immobilisations corporelles (même ventilation que celle du compte 218)|m
+28182|Amortissements du matériel de transport|u
+28183|Amortissements du matériel de bureau et matériel informatique|u
+28184|Amortissements du mobilier|u
+28187|Amortissement du mali de fusion sur actifs corporels|f
+282|Amortissements des immobilisations mises en concession|m
+29|Dépréciations des immobilisations|m
+290|Dépréciations des immobilisations incorporelles|m
+2901|Frais d’établissement|m
+2903|Frais de développement|m
+2905|Marques, procédés, droits et valeurs similaires|m
+2906|Droit au bail|m
+2907|Fonds commercial|m
+2908|Autres immobilisations incorporelles|m
+29081|Dépréciation du mali de fusion sur actifs incorporels|f
+291|Dépréciations des immobilisations corporelles|m
+2911|Terrains|m
+2912|Agencements et aménagements de terrains|m
+2913|Constructions|m
+2914|Constructions sur sol d'autrui|m
+2915|Installations techniques, matériels et outillages industriels|m
+2918|Autres immobilisations corporelles|m
+29187|Dépréciation du mali de fusion sur actifs corporels|f
+292|Dépréciations des immobilisations mises en concession|m
+293|Dépréciations des immobilisations en cours|m
+2931|Immobilisations corporelles en cours|m
+2932|Immobilisations incorporelles en cours|m
+296|Dépréciations des participations et créances rattachées à des participations|m
+2961|Titres de participation|m
+2962|Titres évalués par équivalence|m
+2966|Autres formes de participation|m
+2967|Créances rattachées à des participations (même ventilation que celle du compte 267)|m
+2968|Créances rattachées à des sociétés en participation (même ventilation que celle du compte 268)|m
+297|Dépréciations des autres immobilisations financières|m
+2971|Titres immobilisés autres que les titres immobilisés de l'activité de portefeuille (droit de propriété)|m
+2972|Titres immobilisés (droit de créance)|m
+2973|Titres immobilisés de l'activité de portefeuille|m
+2974|Prêts|m
+2975|Dépôts et cautionnements versés|m
+2976|Autres créances immobilisées|m
+3|Comptes de stocks et en-cours|m
+31|Matières premières et fournitures|m
+32|Autres approvisionnements|m
+321|Matières consommables|m
+322|Fournitures consommables|m
+3221|Combustibles|f
+3222|Produits d'entretien|f
+3223|Fournitures d'atelier et d'usine|f
+3224|Fournitures de magasin|f
+3225|Fournitures de bureau|f
+326|Emballages|m
+3261|Emballages perdus|f
+3265|Emballages récupérables non identifiables|f
+3267|Emballages à usage mixte|f
+33|En-cours de production de biens|m
+331|Produits en cours|m
+335|Travaux en cours|m
+34|En-cours de production de services|m
+341|Études en cours|m
+345|Prestations de services en cours|m
+35|Stocks de produits|m
+351|Produits intermédiaires|m
+355|Produits finis|m
+358|Produits résiduels ou matières de récupération|m
+3581|Déchets|f
+3585|Rebuts|f
+3586|Matières de récupération|f
+36|(Compte à ouvrir, le cas échéant, sous l'intitulé « Stocks provenant d'immobilisations »)|m
+37|Stocks de marchandises|m
+38|(Le compte 38 peut être utilisé pour comptabiliser les stocks en voie d'acheminement, mis en dépôt ou donnés en consignation)|m
+39|Dépréciations des stocks et en-cours|m
+391|Dépréciations des matières premières et fournitures|m
+392|Dépréciations des autres approvisionnements|m
+393|Dépréciations des en-cours de production de biens|m
+394|Dépréciations des en-cours de production de services|m
+395|Dépréciations des stocks de produits|m
+397|Dépréciations des stocks de marchandises|m
+4|Comptes de tiers|m
+40|Fournisseurs et comptes rattachés|m
+401|Fournisseurs|m
+4011|Fournisseurs - Achats de biens et prestations de services|f
+4017|Fournisseurs - Retenues de garantie|f
+403|Fournisseurs - Effets à payer|m
+404|Fournisseurs d'immobilisations|m
+4041|Fournisseurs - Achats d'immobilisations|f
+4047|Fournisseurs d'immobilisations - Retenues de garantie|f
+405|Fournisseurs d'immobilisations - Effets à payer|m
+408|Fournisseurs - Factures non parvenues|m
+4081|Fournisseurs|m
+4084|Fournisseurs d'immobilisations|m
+4088|Fournisseurs - Intérêts courus|m
+409|Fournisseurs débiteurs|m
+4091|Fournisseurs - Avances et acomptes versés sur commandes|m
+4096|Fournisseurs - Créances pour emballages et matériel à rendre|m
+4097|Fournisseurs - Autres avoirs|m
+40971|Fournisseurs d'exploitation|f
+40974|Fournisseurs d'immobilisations|f
+4098|Rabais, remises, ristournes à obtenir et autres avoirs non encore reçus|m
+41|Clients et comptes rattachés|m
+411|Clients|m
+4111|Clients - Ventes de biens ou de prestations de services|f
+4117|Clients - Retenues de garantie|f
+413|Clients - Effets à recevoir|m
+416|Clients douteux ou litigieux|m
+418|Clients - Produits non encore facturés|m
+4181|Clients - Factures à établir|f
+4188|Clients - Intérêts courus|f
+419|Clients créditeurs|m
+4191|Clients - Avances et acomptes reçus sur commandes|m
+4196|Clients - Dettes sur emballages et matériels consignés|m
+4197|Clients - Autres avoirs|m
+4198|Rabais, remises, ristournes à accorder et autres avoirs à établir|m
+42|Personnel et comptes rattachés|m
+421|Personnel - Rémunérations dues|m
+422|Comité social et économique|m
+424|Participation des salariés aux résultats|m
+4246|Réserve spéciale|f
+4248|Comptes courants|f
+425|Personnel - Avances et acomptes et autres comptes débiteurs|m
+426|Personnel - Dépôts|m
+427|Personnel - Oppositions|m
+428|Personnel - Charges à payer|m
+4282|Dettes provisionnées pour congés à payer|f
+4284|Dettes provisionnées pour participation des salariés aux résultats|f
+4286|Autres charges à payer|f
+43|Sécurité sociale et autres organismes sociaux|m
+431|Sécurité sociale|m
+437|Autres organismes sociaux|m
+438|Organismes sociaux - Charges à payer|m
+4382|Charges sociales sur congés à payer|f
+4386|Autres charges à payer|f
+439|Organismes sociaux - Produits à recevoir|m
+44|État et autres collectivités publiques|m
+441|État - Subventions et aides à recevoir|m
+442|Contributions, impôts et taxes recouvrés pour le compte de l'État|m
+4421|Prélèvements à la source (Impôt sur le revenu)|f
+4422|Prélèvements forfaitaires non libératoires|f
+4423|Retenues et prélèvements sur les distributions|f
+444|État - Impôts sur les bénéfices|m
+445|État - Taxes sur le chiffre d'affaires|m
+4452|TVA due intracommunautaire|m
+4455|Taxes sur le chiffre d'affaires à décaisser|m
+44551|TVA à décaisser|f
+44558|Taxes assimilées à la TVA|f
+4456|Taxes sur le chiffre d'affaires déductibles|m
+44562|TVA sur immobilisations|f
+44563|TVA transférée par d'autres entités|f
+44566|TVA sur autres biens et services|f
+44567|Crédit de TVA à reporter|f
+44568|Taxes assimilées à la TVA|f
+4457|Taxes sur le chiffre d'affaires collectées|m
+44571|TVA collectée|f
+44578|Taxes assimilées à la TVA|f
+4458|Taxes sur le chiffre d'affaires à régulariser ou en attente|m
+44581|Acomptes - Régime simplifié d'imposition|f
+44583|Remboursement de taxes sur le chiffre d'affaires demandé|f
+44584|TVA récupérée d’avance|f
+44586|Taxes sur le chiffre d’affaires sur factures non parvenues|f
+44587|Taxes sur le chiffre d’affaires sur factures à établir|f
+446|Obligations cautionnées|m
+447|Autres impôts, taxes et versements assimilés|m
+448|État - Charges à payer et produits à recevoir|m
+4481|État - Charges à Payer|m
+44811|Charges fiscales sur congés à payer|f
+44812|Charges à payer|f
+4482|État - Produits à recevoir|m
+449|Quotas d’émission à acquérir|f
+45|Groupe et associés|m
+451|Groupe|m
+455|Associés - Comptes courants|m
+4551|Principal|f
+4558|Intérêts courus|f
+456|Associés - Opérations sur le capital|m
+4561|Associés - Comptes d'apport en société|f
+45611|Apports en nature|f
+45615|Apports en numéraire|f
+4562|Apporteurs - Capital appelé, non versé|m
+45621|Actionnaires - Capital souscrit et appelé, non versé|f
+45625|Associés - Capital appelé, non versé|f
+4563|Associés - Versements reçus sur augmentation de capital|f
+4564|Associés - Versements anticipés|f
+4566|Actionnaires défaillants|f
+4567|Associés - Capital à rembourser|f
+457|Associés - Dividendes à payer|m
+458|Associés - Opérations faites en commun et en GIE|m
+4581|Opérations courantes|f
+4588|Intérêts courus|f
+46|Débiteurs divers et créditeurs divers|m
+462|Créances sur cessions d'immobilisations|m
+464|Dettes sur acquisitions de valeurs mobilières de placement|m
+465|Créances sur cessions de valeurs mobilières de placement|m
+467|Divers comptes débiteurs et produits à recevoir|m
+468|Divers comptes créditeurs et charges à payer|m
+47|Comptes transitoires ou d'attente|m
+471|Comptes d'attente|f
+472|Comptes d'attente|f
+473|Comptes d'attente|f
+474|Différences d’évaluation – Actif|m
+4741|Différences d'évaluation sur instruments financiers à terme - Actif|f
+4742|Différences d'évaluation sur jetons détenus - Actif|f
+4746|Différences d’évaluation de jetons sur des passifs - Actif|f
+475|Différences d’évaluation – Passif|m
+4751|Différences d'évaluation sur instruments financiers à terme - Passif|f
+4752|Différences d'évaluation sur jetons détenus - Passif|f
+4756|Différences d’évaluation de jetons sur des passifs - Passif|f
+476|Différence de conversion - Actif|m
+4761|Diminution des créances|f
+4762|Augmentation des dettes|f
+4768|Différences compensées par couverture de change|f
+477|Différences de conversion - Passif|m
+4771|Augmentation des créances|f
+4772|Diminution des dettes|f
+4778|Différences compensées par couverture de change|f
+478|Autres comptes transitoires|m
+4781|Mali de fusion sur actif circulant|f
+48|Comptes de régularisation|m
+481|Frais d’émission des emprunts|m
+486|Charges constatées d'avance|m
+487|Produits constatés d'avance|m
+4871|Produits constatés d’avance sur jetons émis|f
+488|Comptes de répartition périodique des charges et des produits|f
+4886|Charges|f
+4887|Produits|f
+49|Dépréciations des comptes de tiers|m
+491|Dépréciations des comptes de clients|m
+495|Dépréciations des comptes du groupe et des associés|m
+4951|Comptes du groupe|f
+4955|Comptes courants des associés|f
+4958|Opérations faites en commun et en GIE|f
+496|Dépréciations des comptes de débiteurs divers|m
+4962|Créances sur cessions d'immobilisations|f
+4965|Créances sur cessions de valeurs mobilières de placement|f
+4967|Autres comptes débiteurs|f
+5|Comptes financiers|m
+50|Valeurs mobilières de placement|m
+502|Actions propres|m
+5021|Actions destinées à être attribuées aux employés et affectées à des plans déterminés|f
+5022|Actions disponibles pour être attribuées aux employés ou pour la régularisation des cours de bourse|f
+503|Actions|m
+5031|Titres cotés|f
+5035|Titres non cotés|f
+504|Autres titres conférant un droit de propriété|m
+505|Obligations et bons émis par la société et rachetés par elle|m
+506|Obligations|m
+5061|Titres cotés|f
+5065|Titres non cotés|f
+507|Bons du Trésor et bons de caisse à court terme|m
+508|Autres valeurs mobilières de placement et autres créances assimilées|m
+5081|Autres valeurs mobilières|f
+5082|Bons de souscription|f
+5088|Intérêts courus sur obligations, bons et valeurs assimilés|f
+509|Versements restant à effectuer sur valeurs mobilières de placement non libérées|m
+51|Banques, établissements financiers et assimilés|m
+511|Valeurs à l'encaissement|m
+5111|Coupons échus à l'encaissement|f
+5112|Chèques à encaisser|f
+5113|Effets à l'encaissement|f
+5114|Effets à l'escompte|f
+512|Banques|m
+5121|Comptes en euros|f
+5124|Comptes en devises|f
+517|Autres organismes financiers|m
+518|Intérêts courus|m
+5181|Intérêts courus à payer|f
+5188|Intérêts courus à recevoir|f
+519|Concours bancaires courants|m
+5191|Crédit de mobilisation de créances commerciales|f
+5193|Mobilisation de créances nées à l'étranger|f
+5198|Intérêts courus sur concours bancaires courants|f
+52|Instruments financiers à terme et jetons détenus|m
+521|Instruments financiers à terme|m
+522|Jetons détenus|m
+523|Jetons auto-détenus|m
+524|Jetons empruntés|m
+53|Caisse|m
+530|Caisse|u
+58|Virements internes|m
+580|Virements internes|u
+59|Dépréciations des comptes financiers|m
+590|Dépréciations des valeurs mobilières de placement|m
+5903|Actions|f
+5904|Autres titres conférant un droit de propriété|f
+5906|Obligations|f
+5908|Autres valeurs mobilières de placement et créances assimilées|f
+6|Comptes de charges|m
+60|Achats (sauf 603)|m
+601|Achats stockés - Matières premières et fournitures|m
+602|Achats stockés - Autres approvisionnements|m
+6021|Matières consommables|f
+6022|Fournitures consommables|f
+60221|Combustibles|f
+60222|Produits d'entretien|f
+60223|Fournitures d'atelier et d'usine|f
+60224|Fournitures de magasin|f
+60225|Fourniture de bureau|f
+6026|Emballages|f
+60261|Emballages perdus|f
+60262|Malis sur emballage|f
+60265|Emballages récupérables non identifiables|f
+60267|Emballages à usage mixte|f
+603|Variation des stocks d'approvisionnements et de marchandises|m
+6031|Variation des stocks de matières premières et fournitures|m
+6032|Variation des stocks des autres approvisionnements|m
+6037|Variation des stocks de marchandises|m
+604|Achats d'études et prestations de services|m
+605|Achats de matériel, équipements et travaux|m
+606|Achats non stockés de matière et fournitures|m
+6061|Fournitures non stockables (eau, énergie, etc.)|f
+6063|Fournitures d'entretien et de petit équipement|f
+6064|Fournitures administratives|f
+6068|Autres matières et fournitures|f
+607|Achats de marchandises|m
+608|(Compte réservé, le cas échéant, au regroupement des frais accessoires incorporés aux achats)|m
+609|Rabais, remises et ristournes obtenus sur achats (même ventilation que celle du compte 60)|m
+6091|Rabais, remises et ristournes obtenus sur achats de matières premières et fournitures|u
+6097|Rabais, remises et ristournes obtenus sur achats de marchandises|u
+6098|Rabais, remises et ristournes non affectés|f
+61|Services extérieurs|m
+611|Sous-traitance générale|m
+612|Redevances de crédit-bail|m
+6122|Crédit-bail mobilier|m
+6125|Crédit-bail immobilier|m
+613|Locations|m
+6132|Locations immobilières|f
+6135|Locations mobilières|f
+614|Charges locatives et de copropriété|m
+615|Entretien et réparation|m
+6152|Entretien et réparation sur biens immobiliers|f
+6155|Entretien et réparation sur biens mobiliers|f
+6156|Maintenance|f
+616|Primes d'assurances|m
+6161|Multirisques|f
+6162|Assurance obligatoire dommage construction|f
+6163|Assurance - transport|f
+61636|sur achats|f
+61637|sur ventes|f
+61638|sur autres biens|f
+6164|Risques d'exploitation|f
+6165|Insolvabilité clients|f
+617|Études et recherches|m
+618|Divers|m
+6181|Documentation générale|f
+6183|Documentation technique|f
+6185|Frais de colloques, séminaires, conférences|f
+619|Rabais, remises et ristournes obtenus sur services extérieurs|m
+62|Autres services extérieurs|m
+621|Personnel extérieur à l'entité|m
+6211|Personnel intérimaire|f
+6214|Personnel détaché ou prêté à l'entité|f
+622|Rémunérations d'intermédiaires et honoraires|m
+6221|Commissions et courtages sur achats|f
+6222|Commissions et courtages sur ventes|f
+6224|Rémunérations des transitaires|f
+6225|Rémunérations d'affacturage|f
+6226|Honoraires|f
+6227|Frais d'actes et de contentieux|f
+6228|Divers|f
+623|Publicité, publications, relations publiques|m
+6231|Annonces et insertions|f
+6232|Échantillons|f
+6233|Foires et expositions|f
+6234|Cadeaux à la clientèle|f
+6235|Primes|f
+6236|Catalogues et imprimés|f
+6237|Publications|f
+6238|Divers (pourboires, dons courants)|f
+624|Transports de biens et transports collectifs du personnel|m
+6241|Transports sur achats|f
+6242|Transports sur ventes|f
+6243|Transports entre établissements ou chantiers|f
+6244|Transports administratifs|f
+6247|Transports collectifs du personnel|f
+6248|Divers|f
+625|Déplacements, missions et réceptions|m
+6251|Voyages et déplacements|f
+6255|Frais de déménagement|f
+6256|Missions|f
+6257|Réceptions|f
+626|Frais postaux et de télécommunications|m
+627|Services bancaires et assimilés|m
+6271|Frais sur titres (achat, vente, garde)|f
+6272|Commissions et frais sur émission d'emprunts|f
+6275|Frais sur effets|f
+6276|Location de coffres|f
+6278|Autres frais et commissions sur prestations de services|f
+628|Divers|m
+6281|Concours divers (cotisations)|f
+6284|Frais de recrutement de personnel|f
+629|Rabais, remises et ristournes obtenus sur autres services extérieurs|m
+63|Impôts, taxes et versements assimilés|m
+631|Impôts, taxes et versements assimilés sur rémunérations (administrations des impôts)|m
+6311|Taxe sur les salaires|f
+6314|Cotisation pour défaut d'investissement obligatoire dans la construction|f
+6318|Autres|f
+633|Impôts, taxes et versements assimilés sur rémunérations (autres organismes)|m
+6331|Versement de transport|f
+6332|Allocations logement|f
+6333|Contribution unique des employeurs à la formation professionnelle|f
+6334|Participation des employeurs à l'effort de construction|f
+6335|Versements libératoires ouvrant droit à l'exonération de la taxe d'apprentissage|f
+6338|Autres|f
+635|Autres impôts, taxes et versements assimilés (administrations des impôts)|m
+6351|Impôts directs (sauf impôts sur les bénéfices)|f
+63511|Contribution économique territoriale|f
+63512|Taxes foncières|f
+63513|Autres impôts locaux|f
+63514|Taxe sur les véhicules des sociétés|f
+6352|Taxe sur le chiffre d'affaires non récupérables|f
+6353|Impôts indirects|f
+6354|Droits d'enregistrement et de timbre|f
+63541|Droits de mutation|f
+6358|Autres droits|f
+637|Autres impôts, taxes et versements assimilés (autres organismes)|m
+6371|Contribution sociale de solidarité à la charge des sociétés|f
+6372|Taxes perçues par les organismes publics internationaux|f
+6374|Impôts et taxes exigibles à l'étranger|f
+6378|Taxes diverses|f
+638|Rappel d’impôts (autres qu’impôts sur les bénéfices)|m
+64|Charges de personnel|m
+641|Rémunérations du personnel|m
+6411|Salaires, appointements|f
+6412|Congés payés|f
+6413|Primes et gratifications|f
+6414|Indemnités et avantages divers|f
+6415|Supplément familial|f
+644|Rémunération du travail de l'exploitant|f
+645|Cotisations de sécurité sociale et de prévoyance|m
+6451|Cotisations à l'Urssaf|f
+6452|Cotisations aux mutuelles|f
+6453|Cotisations aux caisses de retraites|f
+6454|Cotisations à Pôle emploi|f
+6458|Cotisations aux autres organismes sociaux|f
+646|Cotisations sociales personnelles de l'exploitant|f
+647|Autres cotisations sociales|m
+6471|Prestations directes|f
+6472|Versements au comité social et économique|f
+6474|Versements aux autres œuvres sociales|f
+6475|Médecine du travail, pharmacie|f
+648|Autres charges de personnel|m
+649|Remboursements de charges de personnel|m
+65|Autres charges de gestion courante|m
+651|Redevances pour concessions, brevets, licences, marques, procédés, solutions informatiques, droits et valeurs similaires|m
+6511|Redevances pour concessions, brevets, licences, marques, procédés, solutions informatiques|f
+6516|Droits d'auteur et de reproduction|f
+6518|Autres droits et valeurs similaires|f
+653|Rémunérations de l’activité des administrateurs et des gérants|m
+654|Pertes sur créances irrécouvrables|m
+6541|Créances de l'exercice|f
+6544|Créances des exercices antérieurs|f
+655|Quote-part de résultat sur opérations faites en commun|m
+6551|Quote-part de bénéfice transférée - comptabilité du gérant|f
+6555|Quote-part de perte supportée - comptabilité des associés non gérants|f
+656|Pertes de change sur créances et dettes commerciales|m
+657|Valeurs comptables des immobilisations incorporelles et corporelles cédées|m
+658|Pénalités et autres charges|m
+6581|Pénalités sur marchés (et dédits payés sur achats et ventes)|f
+6582|Pénalités, amendes fiscales et pénales|f
+6583|Malis provenant de clauses d’indexation|f
+6584|Lots|f
+6588|Opérations de constitution ou liquidation des fiducies|f
+66|Charges financières|m
+661|Charges d'intérêts|m
+6611|Intérêts des emprunts et dettes|f
+66116|Intérêts des emprunts et dettes assimilées|f
+66117|Intérêts des dettes rattachées à des participations|f
+6612|Charges de la fiducie, résultat de la période|f
+6615|Intérêts des comptes courants et des dépôts créditeurs|f
+6616|Intérêts bancaires et sur opérations de financement (escompte…)|f
+6617|Intérêts des obligations cautionnées|f
+6618|Intérêts des autres dettes|f
+66181|Intérêts des dettes commerciales|f
+66188|Intérêts des dettes diverses|f
+664|Pertes sur créances liées à des participations|m
+665|Escomptes accordés|m
+666|Pertes de change financières|m
+667|Charges sur cession d’éléments financiers|m
+6671|Valeurs comptables des immobilisations financières cédées|m
+6672|Charges nettes sur cessions de titres immobilisés de l’activité de portefeuille|m
+6673|Charges nettes sur cessions de valeurs mobilières de placement|m
+6674|Charges nettes sur cessions de jetons|m
+668|Autres charges financières|m
+6683|Mali provenant du rachat par l’entité d’actions et obligations émises par elle- même|f
+67|Charges exceptionnelles|m
+672|(Compte à la disposition des entités pour enregistrer, en cours d'exercice, les charges sur exercices antérieurs)|m
+678|Autres charges exceptionnelles|m
+68|Dotations aux amortissements, aux dépréciations et aux provisions|m
+681|Dotations aux amortissements, aux dépréciations et aux provisions (à inscrire dans les charges d'exploitation)|m
+6811|Dotations aux amortissements sur immobilisations incorporelles et corporelles|m
+68111|Immobilisations incorporelles et frais d’établissement|f
+68112|Immobilisations corporelles|f
+6815|Dotations aux provisions d'exploitation|m
+6816|Dotations pour dépréciations des immobilisations incorporelles et corporelles|m
+68161|Immobilisations incorporelles|f
+68162|Immobilisations corporelles|f
+6817|Dotations pour dépréciations des actifs circulants|m
+68173|Stocks et en-cours|f
+68174|Créances|f
+686|Dotations aux amortissements, aux dépréciations et aux provisions (à inscrire dans les charges financières)|m
+6861|Dotations aux amortissements des primes de remboursement des emprunts|m
+6862|Dotations aux amortissements des frais d'émission des emprunts|m
+6865|Dotations aux provisions financières|m
+6866|Dotations pour dépréciation des éléments financiers|m
+68662|Immobilisations financières|f
+68665|Valeurs mobilières de placement|f
+687|Dotations aux amortissements, aux dépréciations et aux provisions (à inscrire dans les charges exceptionnelles)|m
+6871|Dotations aux amortissements exceptionnels des immobilisations|m
+6872|Dotations aux provisions réglementées (immobilisations)|m
+68725|Amortissements dérogatoires|f
+6873|Dotations aux provisions réglementées (stocks)|m
+6874|Dotations aux autres provisions réglementées|m
+6875|Dotations aux provisions exceptionnelles|m
+6876|Dotations pour dépréciations exceptionnelles|m
+69|Participation des salariés - Impôts sur les bénéfices et assimilés|m
+691|Participation des salariés aux résultats|m
+695|Impôts sur les bénéfices|m
+6951|Impôts dus en France|f
+6952|Contribution additionnelle à l'impôt sur les bénéfices|f
+6954|Impôts dus à l'étranger|f
+696|Suppléments d'impôt sur les sociétés liés aux distributions|m
+698|Intégration fiscale|m
+6981|Intégration fiscale - Charges|m
+6989|Intégration fiscale - Produits|m
+699|Produits - Reports en arrière des déficits|m
+7|Comptes de produits|m
+70|Ventes de produits fabriqués, prestations de services, marchandises|m
+701|Ventes de produits finis|m
+702|Ventes de produits intermédiaires|m
+703|Ventes de produits résiduels|m
+704|Travaux|m
+705|Études|m
+706|Prestations de services|m
+707|Ventes de marchandises|m
+708|Produits des activités annexes|m
+7081|Produits des services exploités dans l'intérêt du personnel|f
+7082|Commissions et courtages|f
+7083|Locations diverses|f
+7084|Mise à disposition de personnel facturée|f
+7085|Ports et frais accessoires facturés|f
+7086|Bonis sur reprises d'emballages consignés|f
+7087|Bonifications obtenues des clients et primes sur ventes|f
+7088|Autres produits d'activités annexes (cessions d'approvisionnements)|f
+709|Rabais, remises et ristournes accordés|m
+7091|Rabais, remises et ristournes accordés sur ventes de produits finis|m
+7092|Rabais, remises et ristournes accordés sur ventes de produits intermédiaires|m
+7094|Rabais, remises et ristournes accordés sur travaux|m
+7095|Rabais, remises et ristournes accordés sur études|m
+7096|Rabais, remises et ristournes accordés sur prestations de services|m
+7097|Rabais, remises et ristournes accordés sur ventes de marchandises|m
+7098|Rabais, remises et ristournes accordés sur produits des activités annexes|m
+71|Production stockée (ou déstockage)|m
+713|Variation des stocks des en-cours de production et de produits|m
+7133|Variation des en-cours de production de biens|m
+71331|Produits en cours|f
+71335|Travaux en cours|f
+7134|Variation des en-cours de production de services|m
+71341|Études en cours|f
+71345|Prestations de services en cours|f
+7135|Variation des stocks de produits|m
+71351|Produits intermédiaires|f
+71355|Produits finis|f
+71358|Produits résiduels|f
+72|Production immobilisée|m
+721|Immobilisations incorporelles|m
+722|Immobilisations corporelles|m
+74|Subventions|m
+741|Subventions d’exploitation|m
+742|Subventions d’équilibre|m
+747|Quote-part des subventions d’investissement virée au résultat de l’exercice|m
+75|Autres produits de gestion courante|m
+751|Redevances pour concessions, brevets, licences, marques, procédés, solutions informatiques, droits et valeurs similaires|m
+7511|Redevances pour concessions, brevets, licences, marques, procédés, solutions informatiques|f
+7516|Droits d'auteur et de reproduction|f
+7518|Autres droits et valeurs similaires|f
+752|Revenus des immeubles non affectés à des activités professionnelles|m
+753|Rémunérations de l’activité des administrateurs et des gérants|m
+754|Ristournes perçues des coopératives provenant des excédents|m
+755|Quote-part de résultat sur opérations faites en commun|m
+7551|Quote-part de perte transférée - comptabilité du gérant|f
+7555|Quote-part de bénéfice attribuée - comptabilité des associés non-gérants|f
+756|Gains de change sur créances et dettes commerciales|m
+757|Produits des cessions d’immobilisations incorporelles et corporelles|m
+758|Indemnités et autres produits|m
+7581|Dédits et pénalités perçus sur achats et ventes|f
+7582|Libéralités reçues|f
+7583|Rentrées sur créances amorties|f
+7584|Dégrèvements d’impôts autres qu’impôts sur les bénéfices|f
+7585|Bonis provenant de clauses d’indexation|f
+7586|Lots|f
+7587|Indemnités d’assurance|f
+7588|Opérations de constitution ou liquidation des fiducies|f
+76|Produits financiers|m
+761|Produits de participations|m
+7611|Revenus des titres de participation|f
+7612|Produits de la fiducie, résultat de la période|f
+7616|Revenus sur autres formes de participation|f
+7617|Revenus des créances rattachées à des participations|f
+762|Produits des autres immobilisations financières|m
+7621|Revenus des titres immobilisés|f
+7626|Revenus des prêts|f
+7627|Revenus des créances immobilisées|f
+763|Revenus des autres créances|m
+7631|Revenus des créances commerciales|f
+7638|Revenus des créances diverses|f
+764|Revenus des valeurs mobilières de placement|m
+765|Escomptes obtenus|m
+766|Gains de change financiers|m
+767|Produits sur cession d’éléments financiers|m
+7671|Produits des cessions d’immobilisations financières|m
+7672|Produits nets sur cessions de titres immobilisés de l’activité de portefeuille|m
+7673|Produits nets sur cessions de valeurs mobilières de placement|m
+7674|Produits nets sur cessions de jetons|m
+768|Autres produits financiers|m
+7683|Bonis provenant du rachat par l’entreprise d’actions et d’obligations émises par elle-même|f
+77|Produits exceptionnels|m
+772|(Compte à la disposition des entités pour enregistrer, en cours d'exercice, les produits sur exercices antérieurs)|m
+778|Autres produits exceptionnels|m
+78|Reprises sur amortissements, dépréciations et provisions|m
+781|Reprises sur amortissements, dépréciations et provisions (à inscrire dans les produits d'exploitation)|m
+7811|Reprises sur amortissements des immobilisations incorporelles et corporelles|m
+78111|Immobilisations incorporelles|f
+78112|Immobilisations corporelles|f
+7815|Reprises sur provisions d'exploitation|m
+7816|Reprises sur dépréciations des immobilisations incorporelles et corporelles|m
+78161|Immobilisations incorporelles|f
+78162|Immobilisations corporelles|f
+7817|Reprises sur dépréciations des actifs circulants|m
+78173|Stocks et en-cours|f
+78174|Créances|f
+786|Reprises sur dépréciations et provisions (à inscrire dans les produits financiers)|m
+7865|Reprises sur provisions financières|m
+7866|Reprises sur dépréciations des éléments financiers|m
+78662|Immobilisations financières|f
+78665|Valeurs mobilières de placement|f
+787|Reprises sur dépréciations et provisions (à inscrire dans les produits exceptionnels)|m
+7872|Reprises sur provisions réglementées (immobilisations)|m
+78725|Amortissements dérogatoires|f
+7873|Reprises sur provisions réglementées (stocks)|m
+7874|Reprises sur autres provisions réglementées|m
+7875|Reprises sur provisions exceptionnelles|m
+7876|Reprises sur dépréciations exceptionnelles|m
+8|Comptes spéciaux|m
+80|Engagements|m
+801|Engagements donnés par l'entité|m
+8011|Avals, cautions, garanties|f
+8014|Effets circulant sous l'endos de l'entité|f
+8016|Redevances crédit-bail restant à courir|f
+80161|Crédit-bail mobilier|f
+80165|Crédit-bail immobilier|f
+8018|Autres engagements donnés|f
+802|Engagements reçus par l'entité|m
+8021|Avals, cautions, garanties|f
+8024|Créances escomptées non échues|f
+8026|Engagements reçus pour utilisation en crédit-bail|f
+80261|Crédit-bail mobilier|f
+80265|Crédit-bail immobilier|f
+8028|Autres engagements reçus|f
+809|Contrepartie des engagements|m
+8091|Contrepartie 801|f
+8092|Contrepartie 802|f
+88|Résultat en instance d'affectation|m
+89|Bilan|m
+890|Bilan d'ouverture|m
+891|Bilan de clôture|m`;
+const PCG = PCG_RAW.split('\n').map(r => { const [n, l, sys] = r.split('|'); return { n, l, sys, src: sys === 'u' ? 'usuel' : 'pcg' }; });
+const PCG_CLASSES = Object.fromEntries(PCG.filter(a => a.n.length === 1).map(a => [a.n, a.l]));
 const DEFAULT_JOURNALS = [
   { c: 'AC', l: 'Achats' }, { c: 'VT', l: 'Ventes' }, { c: 'BQ', l: 'Banque' },
   { c: 'CA', l: 'Caisse' }, { c: 'OD', l: 'Opérations diverses' }, { c: 'AN', l: 'À-nouveaux' }];
@@ -1254,7 +1865,7 @@ function acItems(kind, qRaw, L) {
     const digits = /^\d+$/.test(qq); let res;
     if (digits) res = ACC_LIST.filter(a => a.n.startsWith(qq)).sort((a, b) => (a.n === qq ? -1 : b.n === qq ? 1 : 0) || a.n.length - b.n.length || a.n.localeCompare(b.n));
     else { const words = norm(q).split(/\s+/).filter(Boolean); res = ACC_LIST.filter(a => a.n.startsWith(qq) || words.every(w => a._k.includes(w))).sort((a, b) => a.n.length - b.n.length || a.n.localeCompare(b.n)); }
-    const out = res.slice(0, 9).map(a => ({ t: 'acc', v: a.n, l: a.l, tag: a.src === 'perso' ? 'perso' : '' }));
+    const out = res.slice(0, 9).map(a => ({ t: 'acc', v: a.n, l: a.l, tag: a.src === 'perso' ? 'perso' : a.src === 'usuel' ? 'usuel' : '' }));
     const exact = ACC_MAP.has(qq); const alias = !exact && digits ? findAcc(qq) : null;
     if (alias) out.unshift({ t: 'acc', v: qq, l: alias.l, tag: '= ' + alias.n });
     if (!exact && !alias) out.push({ t: 'create', kind: 'acc', v: digits ? qq : '', l: digits ? '' : q, label: digits ? `+ Créer le compte ${qq}` : `+ Créer un compte « ${q} »` });
@@ -1832,7 +2443,7 @@ function renderPlanList() {
   const q = ($('#planSearch')?.value || '').trim(); const nq = norm(q); const tab = S.planTab; let html = '';
   if (tab === 'acc') {
     const list = ACC_LIST.filter(a => !q || a.n.startsWith(q) || a._k.includes(nq));
-    html = list.slice(0, 250).map(a => `<li><span class="n">${esc(a.n)}</span><span>${esc(a.l)}</span><span class="t">${a.src === 'perso' ? 'perso' : 'PCG'}</span>${a.src === 'perso' ? `<button type="button" class="del" data-del-acc="${esc(a.n)}" aria-label="Supprimer le compte ${esc(a.n)}">×</button>` : '<span></span>'}</li>`).join('');
+    html = list.slice(0, 250).map(a => `<li><span class="n">${esc(a.n)}</span><span>${esc(a.l)}</span><span class="t">${a.src === 'perso' ? 'perso' : a.src === 'usuel' ? 'usuel' : 'PCG'}</span>${a.src === 'perso' ? `<button type="button" class="del" data-del-acc="${esc(a.n)}" aria-label="Supprimer le compte ${esc(a.n)}">×</button>` : '<span></span>'}</li>`).join('');
     if (list.length > 250) html += `<li class="plist-note">${list.length - 250} autres comptes : affinez la recherche.</li>`;
   } else if (tab === 'tiers') {
     const list = (S.profile.tiers || []).filter(t => !q || t.n.includes(q.toUpperCase()) || norm(t.l).includes(nq)).sort((a, b) => a.n.localeCompare(b.n));
@@ -1911,13 +2522,13 @@ async function runExport(kind, b) {
   try {
     if (kind === 'copy') return copyTSV(b);
     if (kind === 'xlsx') {
-      if (!window.XLSX) { toast("Le module Excel n'a pas pu se charger. Rechargez la page."); return; }
-      await saveFile(fileBase(b) + '.xlsx', buildXlsx(b));
+      toast('Préparation du fichier Excel…');
+      await saveFile(fileBase(b) + '.xlsx', await buildXlsx(b));
     } else {
       if (!window.jspdf || !window.jspdf.jsPDF) { toast("Le module PDF n'a pas pu se charger. Rechargez la page."); return; }
       await saveFile(fileBase(b) + '.pdf', buildPdf(b));
     }
-  } catch (e) { console.error(e); toast("L'export a échoué. Réessayez."); }
+  } catch (e) { console.error(e); toast(xlLoadError(e) ? "Le module Excel n'a pas pu se charger. Vérifiez votre connexion puis réessayez." : "L'export a échoué. Réessayez."); }
 }
 async function saveFile(filename, blob) {
   if (S.downloads) {
@@ -1934,36 +2545,6 @@ async function saveFile(filename, blob) {
     document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 4000);
     toast(`${filename} prêt. Si rien ne se passe, ouvrez la page depuis claude.ai.`);
   } catch (e) { toast("Le téléchargement n'est pas disponible dans cette vue."); }
-}
-function buildXlsx(b) {
-  const X = window.XLSX; const rows = exportRows(b); const s = summary(b.lines);
-  const sub = [b.company, b.period ? 'Période : ' + monthLabel(b.period) : '', 'Édité le ' + isoToFr(new Date().toISOString().slice(0, 10))].filter(Boolean).join('  ·  ');
-  const ws = X.utils.aoa_to_sheet([[b.name || 'Bordereau'], [sub], [], HEAD]);
-  const put = (r, c, cell) => { ws[X.utils.encode_cell({ r, c })] = cell; };
-  const NUM = '#,##0.00';
-  rows.forEach((x, k) => {
-    const r = 4 + k;
-    put(r, 0, { t: 'n', v: x.n });
-    if (x.iso) { const [y, m, d] = x.iso.split('-').map(Number); put(r, 1, { t: 'n', v: (Date.UTC(y, m - 1, d) - Date.UTC(1899, 11, 30)) / 86400000, z: 'dd/mm/yyyy' }); }
-    else put(r, 1, { t: 's', v: x.date || '' });
-    put(r, 2, { t: 's', v: x.j || '' }); put(r, 3, { t: 's', v: x.acc || '' }); put(r, 4, { t: 's', v: x.tiers || '' });
-    put(r, 5, { t: 's', v: x.lib || '' }); put(r, 6, { t: 's', v: x.op || '' });
-    if (x.d != null) put(r, 7, { t: 'n', v: x.d, z: NUM });
-    if (x.c != null) put(r, 8, { t: 'n', v: x.c, z: NUM });
-    if (x.note) put(r, 9, { t: 's', v: x.note });
-  });
-  const tr = 4 + rows.length; const last = 4 + rows.length; // ligne Excel de la dernière donnée
-  put(tr, 6, { t: 's', v: 'Totaux' });
-  put(tr, 7, { t: 'n', v: s.d, f: `SUM(H5:H${last})`, z: NUM });
-  put(tr, 8, { t: 'n', v: s.c, f: `SUM(I5:I${last})`, z: NUM });
-  if (round2(s.d - s.c) !== 0) { put(tr + 1, 6, { t: 's', v: 'Écart (débit - crédit)' }); put(tr + 1, 7, { t: 'n', v: round2(s.d - s.c), f: `H${tr + 1}-I${tr + 1}`, z: NUM }); }
-  ws['!ref'] = X.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: tr + 1, c: 9 } });
-  ws['!cols'] = [{ wch: 6 }, { wch: 11 }, { wch: 8 }, { wch: 14 }, { wch: 15 }, { wch: 36 }, { wch: 44 }, { wch: 14 }, { wch: 14 }, { wch: 30 }];
-  ws['!autofilter'] = { ref: `A4:J${last}` };
-  const wb = X.utils.book_new(); X.utils.book_append_sheet(wb, ws, 'Bordereau');
-  wb.Props = { Title: b.name || 'Bordereau', Company: b.company || '' };
-  const out = X.write(wb, { bookType: 'xlsx', type: 'array' });
-  return new Blob([out], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
 }
 const pdfTxt = s => String(s ?? '').replace(/[  ]/g, ' ').replace(/[’‘]/g, "'").replace(/[“”]/g, '"').replace(/[^\x00-\xff€œŒ–—…·]/g, '?');
 function buildPdf(b) {
@@ -2133,7 +2714,12 @@ function amoCompute(p) {
     R.notes.push(`Plan fiscal linéaire sur ${numTxt(nF)} ans : taux ${pctTxt(1 / nF)} sur ${fmt(va)}, avec le même prorata que le plan économique.`);
   }
   if (mode !== 'eco') R.notes.push(`Amortissement dérogatoire : dotation quand l'annuité fiscale dépasse l'annuité économique, reprise dans le cas inverse. Total des dotations ${fmt(T.d_dot)}, total des reprises ${fmt(T.d_rep)}.`);
+  const accts = ['dotation aux amortissements : débit 6811, crédit 28…'];
+  if (mode !== 'eco') accts.push('dotation dérogatoire : débit 68725, crédit 145', 'reprise dérogatoire : débit 145, crédit 78725');
+  if (sub) accts.push('quote-part de subvention virée au résultat : débit 139, crédit 747');
+  R.notesAcc = `Comptes du PCG 2026 à utiliser à la clôture : ${accts.join(' ; ')}.`;
   if (sub) R.notes.push(`Subvention de ${fmt(sub)} (${numTxt(sub / va * 100, 2)} % de la valeur d'acquisition), virée au résultat au rythme de l'amortissement ${useF ? 'fiscal' : 'économique'} : ${fmt(sub)} × annuité ÷ ${fmt(refBase)}.`);
+  R.notes.push(R.notesAcc);
   R.ok = true; return R;
 }
 
@@ -2435,92 +3021,313 @@ $('#aMoreMenu').addEventListener('click', e => { const b = e.target.closest('[da
 
 /* ---------- Export Excel ---------- */
 async function amoExportXlsx() {
-  const X = window.XLSX; if (!X) { toast("Le module Excel n'a pas pu se charger. Rechargez la page."); return; }
   closeComment(false, true);
-  const d = AS.cur, p = d.p, R = amoCompute(p);
+  const d = AS.cur, R = amoCompute(d.p);
   if (!R.ok) { toast(R.warn[0] || 'Le tableau est incomplet.'); return; }
-  try { await saveFile(fileBase({ name: d.name || 'Amortissement' }) + ' - tableau d’amortissement.xlsx', amoBuildXlsx(d, R)); }
-  catch (e) { console.error(e); toast("L'export a échoué. Réessayez."); }
+  toast('Préparation du fichier Excel…');
+  try { await saveFile(fileBase({ name: d.name || 'Amortissement' }) + ' - tableau d’amortissement.xlsx', await amoBuildXlsx(d, R)); }
+  catch (e) { console.error(e); toast(xlLoadError(e) ? "Le module Excel n'a pas pu se charger. Vérifiez votre connexion puis réessayez." : "L'export a échoué. Réessayez."); }
 }
-function amoBuildXlsx(d, R) {
-  const X = window.XLSX, p = d.p, i = R.info;
-  const ws = {}, merges = []; const E = (r, c) => X.utils.encode_cell({ r, c });
-  const put = (r, c, cell) => { ws[E(r, c)] = cell; return cell; };
-  const EUR = '#,##0.00 "€";-#,##0.00 "€";"- €"', PCT = '0.00#%';
-  const cols = amoVisibleCols(R); const ci = k => cols.findIndex(c => c.k === k); const L = k => X.utils.encode_col(ci(k));
-  const yearTxt = /^\d{4}$/.test(String(p.ex0 || '').trim()) ? String(p.ex0).trim() : (p.ex0 || 'N');
-  const dt = s => { const x = parseDM(s); return x ? `${dmStr(x)}/${yearTxt}` : ''; };
+
+/* ================= Export Excel (ExcelJS) ================= */
+const XL = {
+  navy: 'FF2D4A73', navySoft: 'FFE5EBF4', band: 'FFF4F6F9', border: 'FFD3DAE3', strong: 'FFAEBBCB',
+  ink: 'FF1B2230', muted: 'FF5C6676', warn: 'FF9A5800', err: 'FFB3261E', white: 'FFFFFFFF',
+  NUM: '#,##0.00;-#,##0.00;""', EUR: '#,##0.00 "€";-#,##0.00 "€";"–"', PCT: '0.00#%',
+};
+const XL_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+let excelP = null;
+function loadExcel() {
+  if (window.ExcelJS) return Promise.resolve(window.ExcelJS);
+  if (!excelP) excelP = new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js'; s.async = true;
+    s.onload = () => (window.ExcelJS ? res(window.ExcelJS) : rej(new Error('ExcelJS absent')));
+    s.onerror = () => { excelP = null; s.remove(); rej(new Error('Chargement impossible')); };
+    document.head.appendChild(s);
+  });
+  return excelP;
+}
+['#btnExport', '#aExport'].forEach(sel => { const b = $(sel); ['pointerenter', 'focus'].forEach(ev => b.addEventListener(ev, () => { loadExcel().catch(() => {}); }, { once: true })); });
+
+const xFont = (o = {}) => ({ name: 'Calibri', size: 10, color: { argb: XL.ink }, ...o });
+const xFill = argb => ({ type: 'pattern', pattern: 'solid', fgColor: { argb } });
+const xLine = (argb = XL.border, style = 'thin') => ({ style, color: { argb } });
+const xBox = (argb = XL.border) => ({ top: xLine(argb), left: xLine(argb), bottom: xLine(argb), right: xLine(argb) });
+const xEscHF = s => String(s || '').replace(/&/g, '&&');
+function xStyle(cell, o) { Object.entries(o).forEach(([k, v]) => { if (v !== undefined) cell[k] = v; }); return cell; }
+function xPrint(ws, title, repeatRows) {
+  ws.pageSetup = { paperSize: 9, orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0, horizontalCentered: true,
+    margins: { left: 0.35, right: 0.35, top: 0.5, bottom: 0.6, header: 0.25, footer: 0.3 } };
+  if (repeatRows) ws.pageSetup.printTitlesRow = repeatRows;
+  ws.headerFooter = { oddFooter: `&L&8&K5C6676${xEscHF(title)}&R&8&K5C6676Page &P / &N` };
+}
+function xTitle(ws, lastCol, title, sub) {
+  ws.mergeCells(1, 1, 1, lastCol); ws.mergeCells(2, 1, 2, lastCol);
+  xStyle(ws.getCell(1, 1), { value: title, font: xFont({ size: 15, bold: true, color: { argb: XL.navy } }), alignment: { vertical: 'middle' } });
+  xStyle(ws.getCell(2, 1), { value: sub, font: xFont({ color: { argb: XL.muted } }), alignment: { vertical: 'top' } });
+  ws.getRow(1).height = 26; ws.getRow(2).height = 18; ws.getRow(3).height = 8;
+}
+const todayFr = () => isoToFr(new Date().toISOString().slice(0, 10));
+
+/* Liste des comptes exportée : PCG 2026, subdivisions usuelles et comptes personnels */
+function xAccounts() {
+  return [...ACC_MAP.values()].sort((a, b) => a.n.localeCompare(b.n));
+}
+function xPcgSheet(wb) {
+  const ws = wb.addWorksheet('PCG', { views: [{ state: 'frozen', ySplit: 2, showGridLines: false }], properties: { tabColor: { argb: XL.navy } } });
+  ws.columns = [{ width: 13 }, { width: 96 }, { width: 30 }, { width: 24 }];
+  ws.getColumn(1).numFmt = '@';
+  ws.mergeCells('A1:D1');
+  xStyle(ws.getCell('A1'), { value: "Plan comptable général 2026 (ANC). Pour ajouter un compte, écrivez-le en bas de la liste : son intitulé s'affiche aussitôt dans les autres feuilles.",
+    font: xFont({ italic: true, color: { argb: XL.muted } }), alignment: { vertical: 'middle', wrapText: true } });
+  ws.getRow(1).height = 30;
+  const head = ws.getRow(2); head.values = ['N° de compte', 'Intitulé', 'Classe', 'Origine']; head.height = 22;
+  head.eachCell(c => xStyle(c, { font: xFont({ bold: true, color: { argb: XL.white } }), fill: xFill(XL.navy), border: xBox(XL.navy), alignment: { vertical: 'middle' } }));
+  const list = xAccounts();
+  list.forEach((a, k) => {
+    const row = ws.getRow(3 + k);
+    const origin = a.src === 'perso' ? 'Compte personnel' : a.src === 'usuel' ? 'Subdivision usuelle' : (a.sys === 'f' ? 'PCG 2026 · facultatif' : 'PCG 2026');
+    row.values = [a.n, a.l, `${a.n[0]} · ${PCG_CLASSES[a.n[0]] || ''}`, origin];
+    const lvl = a.n.length;
+    row.eachCell({ includeEmpty: true }, (c, col) => {
+      c.font = xFont({ bold: lvl <= 2, color: { argb: col >= 3 ? XL.muted : (lvl === 1 ? XL.navy : XL.ink) }, italic: a.src === 'perso' });
+      c.border = { bottom: xLine() };
+      if (lvl === 1) c.fill = xFill(XL.navySoft);
+    });
+    row.getCell(1).numFmt = '@';
+    row.getCell(2).alignment = { indent: Math.min(Math.max(lvl - 1, 0), 5) };
+  });
+  ws.autoFilter = 'A2:D2';
+  xPrint(ws, 'Plan comptable général 2026', '2:2');
+  return 2 + list.length;
+}
+function xTiersList(lines, example) {
+  const m = new Map();
+  (S.profile.tiers || []).forEach(t => m.set(t.n, { ...t }));
+  if (example) EXAMPLE_TIERS.forEach(t => { if (!m.has(t.n)) m.set(t.n, { ...t }); });
+  (lines || []).forEach(L => { if (L.tiers && !m.has(L.tiers) && L.lib) m.set(L.tiers, { n: L.tiers, l: L.lib, coll: L.acc }); });
+  return [...m.values()].sort((a, b) => a.n.localeCompare(b.n));
+}
+function xTiersSheet(wb, tiers) {
+  const ws = wb.addWorksheet('Tiers', { views: [{ state: 'frozen', ySplit: 1, showGridLines: false }] });
+  ws.columns = [{ width: 16 }, { width: 44 }, { width: 18 }];
+  ws.getColumn(1).numFmt = '@'; ws.getColumn(3).numFmt = '@';
+  const head = ws.getRow(1); head.values = ['Code tiers', 'Nom', 'Compte collectif']; head.height = 22;
+  head.eachCell(c => xStyle(c, { font: xFont({ bold: true, color: { argb: XL.white } }), fill: xFill(XL.navy), border: xBox(XL.navy), alignment: { vertical: 'middle' } }));
+  tiers.forEach((t, k) => { const r = ws.getRow(2 + k); r.values = [t.n, t.l, t.coll || '']; r.eachCell({ includeEmpty: true }, c => { c.font = xFont(); c.border = { bottom: xLine() }; }); });
+  return ws;
+}
+/* Intitulé recherché dans la feuille PCG : compte exact, sinon compte parent (jusqu'à 3 chiffres retirés) */
+function xLabelFormula(accRef, tiersRef) {
+  const v = x => `VLOOKUP(${x},PCG!$A:$B,2,FALSE)`;
+  const left = k => v(`LEFT(${accRef},LEN(${accRef})-${k})`);
+  const acc = `IF(${accRef}="","",IFERROR(${v(accRef + '&""')},IFERROR(${left(1)},IFERROR(${left(2)},IFERROR(${left(3)},"Compte inconnu")))))`;
+  return tiersRef ? `IF(${tiersRef}<>"",IFERROR(VLOOKUP(${tiersRef}&"",Tiers!$A:$B,2,FALSE),${acc}),${acc})` : acc;
+}
+function xAccountValidation(ws, range, pcgLast) {
+  ws.dataValidations.add(range, {
+    type: 'list', allowBlank: true, formulae: [`PCG!$A$3:$A$${pcgLast + 300}`],
+    showErrorMessage: true, errorStyle: 'warning', errorTitle: 'Compte absent du PCG',
+    error: "Ce numéro n'est pas dans la feuille PCG. Ajoutez-le en bas de la feuille PCG pour que son intitulé s'affiche.",
+  });
+}
+async function xBlob(wb) { return new Blob([await wb.xlsx.writeBuffer()], { type: XL_MIME }); }
+
+/* ---------- Bordereau ---------- */
+async function buildXlsx(b) {
+  const ExcelJS = await loadExcel();
+  const rows = exportRows(b); const s = summary(b.lines);
+  const tiers = xTiersList(b.lines, b.example); const tiersMap = new Map(tiers.map(t => [t.n, t.l]));
+  const wb = new ExcelJS.Workbook(); wb.creator = 'Comptabilité'; wb.title = b.name || 'Bordereau'; wb.created = new Date();
+  const ws = wb.addWorksheet('Bordereau', { views: [{ state: 'frozen', ySplit: 4, showGridLines: false }], properties: { tabColor: { argb: XL.navy } } });
+  const W = [7, 11.5, 9, 13, 14, 36, 44, 14, 14, 28];
+  ws.columns = W.map(width => ({ width }));
+  [4, 5].forEach(c => { ws.getColumn(c).numFmt = '@'; });
+  xTitle(ws, 10, b.name || 'Bordereau', [b.company, b.period ? 'Période : ' + monthLabel(b.period) : '', 'Édité le ' + todayFr()].filter(Boolean).join('   ·   '));
+  const head = ws.getRow(4); head.values = HEAD; head.height = 32;
+  head.eachCell((c, col) => xStyle(c, { font: xFont({ bold: true, color: { argb: XL.white } }), fill: xFill(XL.navy), border: xBox(XL.navy),
+    alignment: { vertical: 'middle', wrapText: true, horizontal: col <= 3 ? 'center' : (col === 8 || col === 9 ? 'right' : 'left'), indent: col >= 4 && col !== 8 && col !== 9 ? 1 : 0 } }));
+  const r0 = 5; const pcgLast = xPcgSheet(wb); if (tiers.length) xTiersSheet(wb, tiers);
+  const srcLines = b.lines.filter(L => !isEmptyLine(L));
+  rows.forEach((x, k) => {
+    const r = r0 + k, row = ws.getRow(r), L = srcLines[k];
+    const derived = (L.tiers && tiersMap.get(L.tiers)) || accLabel(L.acc);
+    const manual = !!L.lib && L.lib !== derived;
+    let date = x.date || '';
+    if (x.iso) { const [y, m, dd] = x.iso.split('-').map(Number); date = new Date(Date.UTC(y, m - 1, dd)); }
+    row.getCell(1).value = x.n;
+    row.getCell(2).value = date;
+    row.getCell(3).value = x.j || '';
+    row.getCell(4).value = x.acc || '';
+    row.getCell(5).value = x.tiers || '';
+    row.getCell(6).value = manual ? L.lib : { formula: xLabelFormula(`D${r}`, tiers.length ? `E${r}` : null), result: x.lib || '' };
+    row.getCell(7).value = x.op || '';
+    if (x.d != null) row.getCell(8).value = x.d;
+    if (x.c != null) row.getCell(9).value = x.c;
+    if (x.note) row.getCell(10).value = x.note;
+    for (let c = 1; c <= 10; c++) {
+      const cell = row.getCell(c);
+      cell.font = xFont(c === 1 ? { color: { argb: XL.muted } } : c === 10 ? { italic: true, color: { argb: XL.muted } } : {});
+      cell.border = xBox(); if (x.band) cell.fill = xFill(XL.band);
+      cell.alignment = { vertical: 'middle', horizontal: c <= 3 ? 'center' : (c === 8 || c === 9 ? 'right' : 'left'), indent: c >= 4 && c !== 8 && c !== 9 ? 1 : 0 };
+    }
+    row.getCell(2).numFmt = 'dd/mm/yyyy'; row.getCell(4).numFmt = '@'; row.getCell(5).numFmt = '@';
+    row.getCell(8).numFmt = XL.NUM; row.getCell(9).numFmt = XL.NUM;
+    if (manual) row.getCell(6).note = "Intitulé saisi à la main : il ne suit pas le numéro de compte.";
+  });
+  const last = r0 + rows.length - 1, rt = last + 1, rs = rt + 1;
+  const tot = ws.getRow(rt);
+  tot.getCell(7).value = 'Totaux';
+  tot.getCell(8).value = { formula: `SUM(H${r0}:H${last})`, result: s.d };
+  tot.getCell(9).value = { formula: `SUM(I${r0}:I${last})`, result: s.c };
+  for (let c = 1; c <= 10; c++) {
+    const cell = tot.getCell(c);
+    xStyle(cell, { font: xFont({ bold: true, color: { argb: XL.navy } }), fill: xFill(XL.navySoft), border: { ...xBox(), top: xLine(XL.navy, 'medium') },
+      alignment: { vertical: 'middle', horizontal: c >= 7 && c <= 9 ? 'right' : 'left' } });
+  }
+  tot.getCell(8).numFmt = '#,##0.00'; tot.getCell(9).numFmt = '#,##0.00'; tot.height = 20;
+  const sol = ws.getRow(rs); const diff = round2(s.d - s.c);
+  sol.getCell(7).value = 'Solde (débit − crédit)';
+  sol.getCell(8).value = { formula: `H${rt}-I${rt}`, result: diff };
+  sol.getCell(9).value = { formula: `IF(ROUND(H${rt}-I${rt},2)=0,"Équilibré","Déséquilibré")`, result: diff ? 'Déséquilibré' : 'Équilibré' };
+  [7, 8, 9].forEach(c => xStyle(sol.getCell(c), { font: xFont({ color: { argb: XL.muted } }), alignment: { horizontal: 'right' } }));
+  sol.getCell(8).numFmt = '#,##0.00;-#,##0.00;0.00'; sol.getCell(9).font = xFont({ bold: true, color: { argb: XL.navy } });
+  ws.addConditionalFormatting({ ref: `H${rs}:I${rs}`, rules: [{ type: 'expression', priority: 1, formulae: [`ROUND($H$${rt}-$I$${rt},2)<>0`], style: { font: { bold: true, color: { argb: XL.err } } } }] });
+  ws.autoFilter = `A4:J${last}`;
+  if (rows.length) xAccountValidation(ws, `D${r0}:D${last}`, pcgLast);
+  xPrint(ws, b.name || 'Bordereau', '4:4');
+  return xBlob(wb);
+}
+
+/* ---------- Tableau d'amortissement ---------- */
+async function amoBuildXlsx(d, R) {
+  const ExcelJS = await loadExcel(); const p = d.p, i = R.info;
+  const wb = new ExcelJS.Workbook(); wb.creator = 'Comptabilité'; wb.created = new Date();
   const title = 'Immobilisation : ' + ([p.compte, p.designation].filter(Boolean).join(' - ') || d.name || '');
-  put(0, 0, { t: 's', v: title });
+  wb.title = title;
+  const ws = wb.addWorksheet('Amortissement', { views: [{ showGridLines: false }], properties: { tabColor: { argb: XL.navy } } });
+  const cols = amoVisibleCols(R); const nC = cols.length;
   const sub = p.sub.on ? +p.sub.montant || 0 : 0;
+  const yearTxt = /^\d{4}$/.test(String(p.ex0 || '').trim()) ? String(p.ex0).trim() : (p.ex0 || 'N');
+  const dt = v => { const x = parseDM(v); return x ? `${dmStr(x)}/${yearTxt}` : ''; };
+  // Blocs de paramètres : [titre, [[libellé, valeur, format]]]
   const blocks = [
-    [["Valeur d'acquisition", { t: 'n', v: i.va, z: EUR }], ['Valeur résiduelle', { t: 'n', v: i.vr, z: EUR }], ["Date d'acquisition", { t: 's', v: dt(p.dateAcq) }], ['Mise en service', { t: 's', v: dt(p.dateMes) }], ['Clôture', { t: 's', v: dmStr(i.clo) }]],
-    [['Plan économique', { t: 's', v: 'Linéaire' }], ['Durée', { t: 's', v: `${numTxt(i.nE)} ans` }], ['Taux', { t: 'n', v: 1 / i.nE, z: PCT }], ['Base amortissable', { t: 'n', v: i.baseE, z: EUR }]],
+    ['Immobilisation', [['Compte', p.compte || '', '@'], ['Intitulé du compte', { label: true }], ["Valeur d'acquisition", i.va, XL.EUR], ['Valeur résiduelle', i.vr, XL.EUR],
+      ["Date d'acquisition", dt(p.dateAcq)], ['Mise en service', dt(p.dateMes)], ['Clôture', dmStr(i.clo)]]],
+    ['Plan économique', [['Mode', 'Linéaire'], ['Durée', `${numTxt(i.nE)} ans`], ['Taux', 1 / i.nE, XL.PCT], ['Base amortissable', i.baseE, XL.EUR]]],
   ];
-  if (R.show.f) blocks.push(R.mode === 'degressif'
-    ? [['Plan fiscal', { t: 's', v: 'Dégressif' }], ['Durée', { t: 's', v: `${i.nF} ans` }], ['Coefficient', { t: 'n', v: i.coef, z: '0.00' }], ['Taux', { t: 'n', v: i.tD, z: PCT }]]
-    : [['Plan fiscal', { t: 's', v: 'Linéaire' }], ['Durée', { t: 's', v: `${numTxt(i.nF)} ans` }], ['Taux', { t: 'n', v: 1 / i.nF, z: PCT }]]);
-  let subAbs = null;
-  if (R.show.s) blocks.push([['Subvention', { t: 'n', v: sub, z: EUR }], ['% de la valeur', { t: 'n', v: sub / i.va, z: '0.00#%' }], ['Reprise au rythme de', { t: 's', v: p.sub.base === 'fisc' && R.mode !== 'eco' ? "l'amortissement fiscal" : "l'amortissement économique" }]]);
-  let maxParam = 0;
-  blocks.forEach((b, bi) => b.forEach(([lab, cell], li) => {
-    const r = 2 + li, c = bi * 3; put(r, c, { t: 's', v: lab }); merges.push({ s: { r, c }, e: { r, c: c + 1 } }); put(r, c + 2, cell);
-    if (lab === 'Subvention') subAbs = '$' + X.utils.encode_col(c + 2) + '$' + (r + 1);
-    maxParam = Math.max(maxParam, r);
-  }));
-  // En-têtes du tableau
-  const top = maxParam + 2;
-  put(top, 0, { t: 's', v: 'Exercice' }); merges.push({ s: { r: top, c: 0 }, e: { r: top + 1, c: 0 } });
-  let c0 = 1; const groups = [];
-  cols.forEach(c => { if (!c.g) return; const l = groups[groups.length - 1]; if (l && l.g === c.g) l.n++; else groups.push({ g: c.g, n: 1 }); });
-  groups.forEach(g => { put(top, c0, { t: 's', v: AMO_GROUPS[g.g] }); if (g.n > 1) merges.push({ s: { r: top, c: c0 }, e: { r: top, c: c0 + g.n - 1 } }); c0 += g.n; });
-  cols.forEach((c, k) => { if (k) put(top + 1, k, { t: 's', v: c.h }); });
+  if (R.show.f) blocks.push(['Plan fiscal', R.mode === 'degressif'
+    ? [['Mode', 'Dégressif'], ['Durée', `${i.nF} ans`], ['Coefficient', i.coef, '0.00'], ['Taux', i.tD, XL.PCT]]
+    : [['Mode', 'Linéaire'], ['Durée', `${numTxt(i.nF)} ans`], ['Taux', 1 / i.nF, XL.PCT]]]);
+  if (R.show.s) blocks.push(["Subvention d'investissement", [['Montant', sub, XL.EUR], ['% de la valeur', sub / i.va, XL.PCT],
+    ['Reprise au rythme de', p.sub.base === 'fisc' && R.mode !== 'eco' ? "l'amort. fiscal" : "l'amort. économique"]]]);
+  const lastCol = Math.max(nC, blocks.length * 3);
+  ws.columns = Array.from({ length: lastCol }, (_, k) => ({ width: k === 0 ? 13 : (cols[k] && cols[k].k === 'f_taux' ? 17 : 15) }));
+  xTitle(ws, lastCol, title, `Tableau d'amortissement   ·   édité le ${todayFr()}`);
+  // Paramètres
+  const pTop = 4; let maxRows = 0, subAbs = null, compteRef = null;
+  blocks.forEach(([bt, items], bi) => {
+    const c0 = bi * 3 + 1;
+    ws.mergeCells(pTop, c0, pTop, c0 + 2);
+    xStyle(ws.getCell(pTop, c0), { value: bt, font: xFont({ bold: true, color: { argb: XL.navy } }), border: { bottom: xLine(XL.navy, 'medium') } });
+    [c0 + 1, c0 + 2].forEach(c => { ws.getCell(pTop, c).border = { bottom: xLine(XL.navy, 'medium') }; });
+    items.forEach(([lab, val, fmtStr], li) => {
+      const r = pTop + 1 + li; ws.mergeCells(r, c0, r, c0 + 1);
+      xStyle(ws.getCell(r, c0), { value: lab, font: xFont({ color: { argb: XL.muted } }), border: { bottom: xLine() } });
+      ws.getCell(r, c0 + 1).border = { bottom: xLine() };
+      const vc = ws.getCell(r, c0 + 2);
+      if (val && val.label) {
+        vc.value = { formula: xLabelFormula(compteRef), result: accLabel(p.compte) || '' };
+        vc.font = xFont({ bold: true }); vc.alignment = { horizontal: 'left', indent: 1, shrinkToFit: true };
+      } else {
+        vc.value = val; vc.font = xFont({ bold: true }); vc.alignment = { horizontal: 'left', indent: 1 };
+      }
+      if (fmtStr) vc.numFmt = fmtStr;
+      vc.border = { bottom: xLine() };
+      if (lab === 'Compte') { compteRef = vc.address; }
+      if (lab === 'Montant' && bi === blocks.length - 1 && R.show.s) subAbs = '$' + ws.getColumn(c0 + 2).letter + '$' + r;
+    });
+    maxRows = Math.max(maxRows, items.length);
+  });
+  if (compteRef) xAccountValidation(ws, compteRef, 2 + xAccounts().length);
+  // Tableau
+  const top = pTop + maxRows + 2;
+  const L = k => ws.getColumn(cols.findIndex(c => c.k === k) + 1).letter;
+  const groups = []; cols.forEach(c => { if (!c.g) return; const l = groups[groups.length - 1]; if (l && l.g === c.g) l.n++; else groups.push({ g: c.g, n: 1 }); });
+  ws.mergeCells(top, 1, top + 1, 1);
+  xStyle(ws.getCell(top, 1), { value: 'Exercice', font: xFont({ bold: true, color: { argb: XL.white } }), fill: xFill(XL.navy), border: xBox(XL.navy), alignment: { vertical: 'middle', horizontal: 'center' } });
+  let c0 = 2;
+  groups.forEach(g => {
+    if (g.n > 1) ws.mergeCells(top, c0, top, c0 + g.n - 1);
+    for (let c = c0; c < c0 + g.n; c++) xStyle(ws.getCell(top, c), { font: xFont({ bold: true, color: { argb: XL.white } }), fill: xFill(XL.navy), border: xBox(XL.navy), alignment: { horizontal: 'center', vertical: 'middle' } });
+    ws.getCell(top, c0).value = AMO_GROUPS[g.g];
+    c0 += g.n;
+  });
+  cols.forEach((c, k) => {
+    if (!k) return;
+    xStyle(ws.getCell(top + 1, k + 1), { value: c.h, font: xFont({ bold: true, color: { argb: XL.navy } }), fill: xFill(XL.navySoft),
+      border: { ...xBox(), left: xLine(c.first ? XL.strong : XL.border, c.first ? 'medium' : 'thin') }, alignment: { horizontal: c.k === 'f_taux' ? 'left' : 'right', indent: c.k === 'f_taux' ? 1 : 0, vertical: 'middle', wrapText: true } });
+  });
+  ws.getRow(top).height = 22; ws.getRow(top + 1).height = 22;
   const r0 = top + 2;
   R.rows.forEach((row, ri) => {
-    const r = r0 + ri, xr = r + 1, pr = r;
+    const r = r0 + ri, pr = r - 1;
     cols.forEach((c, k) => {
-      const v = row[c.k]; const n = v == null ? 0 : v; let cell;
+      const cell = ws.getCell(r, k + 1), v = row[c.k], n = v == null ? 0 : v;
       switch (c.k) {
-        case 'ex': cell = { t: 's', v }; break;
-        case 'f_taux': cell = { t: 's', v: v || '' }; break;
-        case 'f_base': cell = R.mode === 'degressif' && ri > 0 && v != null ? { t: 'n', v: n, f: `${L('f_vnc')}${pr}`, z: EUR } : { t: 'n', v: n, z: EUR }; break;
-        case 'f_vnc': cell = v == null ? { t: 'n', v: 0, z: EUR } : { t: 'n', v: n, z: EUR, f: R.mode === 'degressif' || ri === 0 ? `${L('f_base')}${xr}-${L('f_ann')}${xr}` : `${L('f_vnc')}${pr}-${L('f_ann')}${xr}` }; break;
-        case 'e_vnc': cell = v == null ? { t: 'n', v: 0, z: EUR } : { t: 'n', v: n, z: EUR, f: ri === 0 ? `${L('e_base')}${xr}-${L('e_ann')}${xr}` : `${L('e_vnc')}${pr}-${L('e_ann')}${xr}` }; break;
-        case 'd_dot': cell = { t: 'n', v: n, z: EUR, f: `MAX(0,${L('f_ann')}${xr}-${L('e_ann')}${xr})` }; break;
-        case 'd_rep': cell = { t: 'n', v: n, z: EUR, f: `MAX(0,${L('e_ann')}${xr}-${L('f_ann')}${xr})` }; break;
-        case 'd_cum': cell = { t: 'n', v: n, z: EUR, f: (ri ? `${L('d_cum')}${pr}+` : '') + `${L('d_dot')}${xr}-${L('d_rep')}${xr}` }; break;
-        case 's_reste': cell = { t: 'n', v: n, z: EUR, f: (ri ? `${L('s_reste')}${pr}` : subAbs) + `-${L('s_qp')}${xr}` }; break;
-        default: cell = { t: 'n', v: n, z: EUR };
+        case 'ex': cell.value = v; break;
+        case 'f_taux': cell.value = v || ''; break;
+        case 'f_base': cell.value = R.mode === 'degressif' && ri > 0 && v != null ? { formula: `${L('f_vnc')}${pr}`, result: n } : n; break;
+        case 'f_vnc': cell.value = v == null ? 0 : { formula: R.mode === 'degressif' || ri === 0 ? `${L('f_base')}${r}-${L('f_ann')}${r}` : `${L('f_vnc')}${pr}-${L('f_ann')}${r}`, result: n }; break;
+        case 'e_vnc': cell.value = v == null ? 0 : { formula: ri === 0 ? `${L('e_base')}${r}-${L('e_ann')}${r}` : `${L('e_vnc')}${pr}-${L('e_ann')}${r}`, result: n }; break;
+        case 'd_dot': cell.value = { formula: `MAX(0,${L('f_ann')}${r}-${L('e_ann')}${r})`, result: n }; break;
+        case 'd_rep': cell.value = { formula: `MAX(0,${L('e_ann')}${r}-${L('f_ann')}${r})`, result: n }; break;
+        case 'd_cum': cell.value = { formula: (ri ? `${L('d_cum')}${pr}+` : '') + `${L('d_dot')}${r}-${L('d_rep')}${r}`, result: n }; break;
+        case 's_reste': cell.value = { formula: (ri ? `${L('s_reste')}${pr}` : subAbs) + `-${L('s_qp')}${r}`, result: n }; break;
+        default: cell.value = n;
       }
-      put(r, k, cell);
+      cell.font = xFont(c.k === 'ex' ? { bold: true } : c.k === 'f_taux' ? { italic: true, color: { argb: XL.muted } } : {});
+      cell.alignment = { vertical: 'middle', horizontal: c.k === 'ex' ? 'center' : c.k === 'f_taux' ? 'left' : 'right', indent: c.k === 'f_taux' ? 1 : 0 };
+      if (c.k !== 'ex' && c.k !== 'f_taux') cell.numFmt = XL.EUR;
+      cell.border = { ...xBox(), left: xLine(c.first ? XL.strong : XL.border, c.first ? 'medium' : 'thin') };
+      if (ri % 2) cell.fill = xFill(XL.band);
     });
   });
   const rt = r0 + R.rows.length;
   cols.forEach((c, k) => {
-    if (c.k === 'ex') put(rt, k, { t: 's', v: 'Total' });
-    else if (c.k in R.tot) put(rt, k, { t: 'n', v: R.tot[c.k], z: EUR, f: `SUM(${L(c.k)}${r0 + 1}:${L(c.k)}${rt})` });
+    const cell = ws.getCell(rt, k + 1);
+    if (c.k === 'ex') cell.value = 'Total';
+    else if (c.k in R.tot) { cell.value = { formula: `SUM(${L(c.k)}${r0}:${L(c.k)}${rt - 1})`, result: R.tot[c.k] }; cell.numFmt = XL.EUR; }
+    xStyle(cell, { font: xFont({ bold: true, color: { argb: XL.navy } }), fill: xFill(XL.navySoft),
+      border: { ...xBox(), top: xLine(XL.navy, 'medium'), left: xLine(c.first ? XL.strong : XL.border, c.first ? 'medium' : 'thin') },
+      alignment: { vertical: 'middle', horizontal: c.k === 'ex' ? 'center' : 'right' } });
   });
+  ws.getRow(rt).height = 20;
   // Commentaires de cellule
   Object.entries(d.comments).forEach(([key, text]) => {
-    const [rk, ck] = key.split(':'); const k = ci(ck); if (k < 0) return;
+    const [rk, ck] = key.split(':'); const k = cols.findIndex(c => c.k === ck); if (k < 0) return;
     const ri = rk === 'tot' ? null : +rk.slice(1); if (ri != null && ri >= R.rows.length) return;
-    const addr = E(ri == null ? rt : r0 + ri, k); if (!ws[addr]) ws[addr] = { t: 's', v: '' };
-    ws[addr].c = [{ a: 'Commentaire', t: text }]; ws[addr].c.hidden = true;
+    ws.getCell(ri == null ? rt : r0 + ri, k + 1).note = { texts: [{ font: { size: 9, name: 'Calibri' }, text }] };
   });
-  // Détail du calcul
+  // Détail du calcul et points à vérifier
+  const totalW = ws.columns.reduce((t, c) => t + (c.width || 10), 0);
   let rn = rt + 2;
-  put(rn++, 0, { t: 's', v: 'Détail du calcul' });
-  R.notes.forEach(n => put(rn++, 0, { t: 's', v: '• ' + n }));
-  if (R.warn.length) { rn++; put(rn++, 0, { t: 's', v: 'Points à vérifier' }); R.warn.forEach(w => put(rn++, 0, { t: 's', v: '• ' + w })); }
-  const lastCol = Math.max(cols.length - 1, blocks.length * 3 - 1);
-  merges.push({ s: { r: 0, c: 0 }, e: { r: 0, c: lastCol } });
-  ws['!ref'] = X.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: rn, c: lastCol } });
-  ws['!merges'] = merges;
-  ws['!cols'] = Array.from({ length: lastCol + 1 }, (_, k) => ({ wch: k === 0 ? 13 : (cols[k] && cols[k].k === 'f_taux' ? 18 : 15) }));
-  const wb = X.utils.book_new(); X.utils.book_append_sheet(wb, ws, 'Amortissement');
-  wb.Props = { Title: title };
-  return new Blob([X.write(wb, { bookType: 'xlsx', type: 'array' })], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const para = (text, font) => {
+    ws.mergeCells(rn, 1, rn, lastCol);
+    xStyle(ws.getCell(rn, 1), { value: text, font, alignment: { wrapText: true, vertical: 'top' } });
+    ws.getRow(rn).height = Math.max(16, Math.ceil(text.length / (totalW * 1.2)) * 14 + 3); rn++;
+  };
+  const heading = (text, argb) => { ws.mergeCells(rn, 1, rn, lastCol); xStyle(ws.getCell(rn, 1), { value: text, font: xFont({ bold: true, size: 11, color: { argb } }), border: { bottom: xLine(argb) } }); ws.getRow(rn).height = 20; rn++; };
+  heading('Détail du calcul', XL.navy);
+  R.notes.forEach(n => para('•  ' + n, xFont()));
+  if (R.warn.length) { rn++; heading('Points à vérifier', XL.warn); R.warn.forEach(w => para('•  ' + w, xFont({ color: { argb: XL.warn } }))); }
+  xPrint(ws, title, `${top}:${top + 1}`);
+  xPcgSheet(wb);
+  return xBlob(wb);
 }
+
+const xlLoadError = e => /Chargement|ExcelJS/.test(String(e && e.message));
 
 
 /* ================= Version en ligne : connexion Supabase ================= */

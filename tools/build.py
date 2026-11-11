@@ -33,7 +33,7 @@ def main() -> None:
     head_part, body_part = src.split(marker, 1)
     body_part = marker + body_part
     head_part = head_part.replace('<meta name="claude:viewport-fit-sides" content="cover">\n', "")
-    first_script = '<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/'
+    first_script = '<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/'
     assert body_part.count(first_script) == 1, "point d'insertion des scripts introuvable"
     config = (
         f'<script>window.COMPTA_CONFIG = {{ url: "{SUPABASE_URL}", key: "{SUPABASE_KEY}" }};</script>\n'
