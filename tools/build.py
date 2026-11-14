@@ -3,21 +3,28 @@
 
 src/app.html est la page elle-même, sans <html>/<head>/<body> : c'est aussi la version
 publiée comme artifact Claude. Ce script l'entoure d'un document complet et ajoute
-la connexion Supabase (config publique + bibliothèque supabase-js).
+la connexion Firebase (configuration publique + bibliothèques Firebase).
 
 Usage : python3 tools/build.py
 """
+import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "src" / "app.html"
 OUT = ROOT / "index.html"
 
-# Clé publiable : elle est faite pour être visible dans le navigateur.
-# Les données restent protégées par les règles RLS de la table « documents ».
-SUPABASE_URL = "https://efnxedcbkgnphjrnlnvd.supabase.co"
-SUPABASE_KEY = "sb_publishable_3X3l8OgQosV4QQNXPORQIg_qMvCrxMh"
-SUPABASE_JS = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.js"
+# Configuration Web Firebase : ces valeurs sont publiques par nature.
+# Les données restent protégées par les règles de sécurité Firestore (voir firestore.rules).
+FIREBASE_CONFIG = {
+    "apiKey": "AIzaSyDv6W7YaXJU9b7f6lY13-iBMNq0rG1Kfas",
+    "authDomain": "compta-cours.firebaseapp.com",
+    "projectId": "compta-cours",
+    "storageBucket": "compta-cours.firebasestorage.app",
+    "messagingSenderId": "89105194516",
+    "appId": "1:89105194516:web:90a97905f4c7a4a1735101",
+}
+FIREBASE_JS = [f"https://cdn.jsdelivr.net/npm/firebase@10.14.1/{name}-compat.js" for name in ("firebase-app", "firebase-auth", "firebase-firestore")]
 
 ICON = ("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3E"
         "%3Crect x='1' y='1' width='28' height='28' rx='6' fill='%232D4A73'/%3E"
@@ -35,10 +42,8 @@ def main() -> None:
     head_part = head_part.replace('<meta name="claude:viewport-fit-sides" content="cover">\n', "")
     first_script = '<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/'
     assert body_part.count(first_script) == 1, "point d'insertion des scripts introuvable"
-    config = (
-        f'<script>window.COMPTA_CONFIG = {{ url: "{SUPABASE_URL}", key: "{SUPABASE_KEY}" }};</script>\n'
-        f'<script src="{SUPABASE_JS}"></script>\n'
-    )
+    config = f"<script>window.COMPTA_CONFIG = {json.dumps(FIREBASE_CONFIG)};</script>\n" + "".join(
+        f'<script src="{src}"></script>\n' for src in FIREBASE_JS)
     body_part = body_part.replace(first_script, config + first_script)
     html = (
         "<!doctype html>\n<html lang=\"fr\">\n<head>\n"

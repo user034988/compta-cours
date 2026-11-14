@@ -319,6 +319,9 @@ table.amo td.has-c::after{content:"";position:absolute;top:0;right:0;border-styl
               <button type="button" data-more="dup">Dupliquer le bordereau</button>
               <button type="button" data-more="help">Raccourcis clavier <small>?</small></button>
               <hr>
+              <button type="button" data-bk="save">Sauvegarder tous mes documents <small>.json</small></button>
+              <button type="button" data-bk="restore">Restaurer une sauvegarde…</button>
+              <hr>
               <button type="button" data-more="del" style="color:var(--err)">Supprimer le bordereau</button>
             </div>
           </div>
@@ -370,6 +373,9 @@ table.amo td.has-c::after{content:"";position:absolute;top:0;right:0;border-styl
             <button class="btn icon" id="aMore" type="button" aria-label="Autres actions" aria-haspopup="true" aria-expanded="false">⋯</button>
             <div class="menu" id="aMoreMenu" hidden>
               <button type="button" data-amore="dup">Dupliquer le tableau</button>
+              <hr>
+              <button type="button" data-bk="save">Sauvegarder tous mes documents <small>.json</small></button>
+              <button type="button" data-bk="restore">Restaurer une sauvegarde…</button>
               <hr>
               <button type="button" data-amore="del" style="color:var(--err)">Supprimer le tableau</button>
             </div>
@@ -447,6 +453,7 @@ table.amo td.has-c::after{content:"";position:absolute;top:0;right:0;border-styl
 <div class="modal-back" id="modal" hidden><div class="modal-card" id="modalCard" role="dialog" aria-modal="true"></div></div>
 <aside class="drawer" id="drawer" hidden aria-label="Plan comptable"></aside>
 <div class="toast" id="toast" hidden role="status"></div>
+<input type="file" id="backupFile" accept=".json,application/json" hidden>
 <div class="auth" id="auth" hidden>
   <form class="auth-card" id="authForm" novalidate>
     <div class="brand">
@@ -2025,7 +2032,7 @@ const store = {
   mode: 'local', db: null, pref: null,
   async init() {
     const cfg = window.COMPTA_CONFIG;
-    if (cfg && window.supabase && typeof window.supabase.createClient === 'function') return this.initSupabase(cfg);
+    if (cfg && window.firebase && typeof window.firebase.initializeApp === 'function') return this.initCloud(cfg);
     const cl = window.claude;
     if (cl && typeof cl.use === 'function') {
       cl.use('downloads').then(d => { S.downloads = d; }).catch(() => {});
@@ -2038,44 +2045,42 @@ const store = {
     await this.loadProfile();
     this.watchList(); this.watchImmos();
   },
-  async initSupabase(cfg) {
-    this.mode = 'sb'; S.mode = 'sb';
-    const sb = window.supabase.createClient(cfg.url, cfg.key, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
-    this.sb = sb; AUTH.sb = sb;
-    const recovery = /type=recovery/.test(location.hash);
+  async initCloud(cfg) {
+    this.mode = 'cloud'; S.mode = 'cloud';
+    firebase.initializeApp(cfg);
+    const auth = firebase.auth(); auth.languageCode = 'fr';
+    this.fs = firebase.firestore(); AUTH.fb = auth;
     const ready = new Promise(res => { AUTH.resolve = res; });
-    sb.auth.onAuthStateChange((ev, session) => {
-      if (ev === 'PASSWORD_RECOVERY') { showAuth('newpwd'); return; }
-      if (ev === 'SIGNED_IN' && session && AUTH.resolve && AUTH.mode !== 'newpwd') authDone(session);
+    let first = true;
+    auth.onAuthStateChanged(user => {
+      if (user) { if (AUTH.resolve) authDone(user); }
+      else if (first) showAuth('login');
+      first = false;
     });
-    let session = null; try { ({ data: { session } } = await sb.auth.getSession()); } catch (e) {}
-    if (session && !recovery) authDone(session); else showAuth(recovery ? 'newpwd' : 'login');
-    session = await ready;
-    if (location.hash && /access_token|type=/.test(location.hash)) history.replaceState(null, '', location.pathname + location.search);
-    this.uid = session.user.id;
-    $('#sideEmail').textContent = session.user.email || ''; $('#sideAccount').hidden = false;
+    const user = await ready;
+    this.uid = user.uid; this.col = this.fs.collection('users').doc(user.uid).collection('documents');
+    $('#sideEmail').textContent = user.email || ''; $('#sideAccount').hidden = false;
     renderStoreNote();
     await this.loadProfile();
     this.watchList(); this.watchImmos();
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') this.refresh(); });
   },
-  async sbFetch(kind) {
-    const { data, error } = await this.sb.from('documents').select('id,data').eq('kind', kind); if (error) throw error;
-    return new Map((data || []).map(r => [r.id, r.data]));
+  async cloudFetch(kind) {
+    const snap = await this.col.where('kind', '==', kind).get();
+    return new Map(snap.docs.map(d => [d.id, d.data().data]));
   },
-  async sbUpsert(kind, doc, id = doc.id) {
-    const { error } = await this.sb.from('documents').upsert({ user_id: this.uid, id, kind, data: doc, updated_at: new Date().toISOString() }, { onConflict: 'user_id,id' });
-    if (error) throw error;
+  async cloudUpsert(kind, doc, id = doc.id) {
+    await this.col.doc(id).set({ kind, data: JSON.parse(JSON.stringify(doc)), updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
   },
-  async sbDelete(id) { const { error } = await this.sb.from('documents').delete().eq('id', id); if (error) throw error; },
+  async cloudDelete(id) { await this.col.doc(id).delete(); },
   refresh() {
-    if (this.mode !== 'sb') return;
-    this.sbFetch('bordereau').then(m => { S.list = m; onListUpdate(); }).catch(() => {});
-    this.sbFetch('immobilisation').then(m => { AS.list = m; amoOnListUpdate(); }).catch(() => {});
+    if (this.mode !== 'cloud') return;
+    this.cloudFetch('bordereau').then(m => { S.list = m; onListUpdate(); }).catch(() => {});
+    this.cloudFetch('immobilisation').then(m => { AS.list = m; amoOnListUpdate(); }).catch(() => {});
   },
   watchImmos() {
-    if (this.mode === 'sb') {
-      this.sbFetch('immobilisation').then(m => { AS.list = m; AS.listState = 'ready'; amoOnListUpdate(); })
+    if (this.mode === 'cloud') {
+      this.cloudFetch('immobilisation').then(m => { AS.list = m; AS.listState = 'ready'; amoOnListUpdate(); })
         .catch(() => { AS.listState = 'error'; if (S.view === 'amo') renderList(); toast('Impossible de lire vos tableaux pour le moment.'); });
       return;
     }
@@ -2086,7 +2091,7 @@ const store = {
     } else { const o = lsRead(); AS.list = new Map(Object.entries(o.immos || {})); AS.listState = 'ready'; amoOnListUpdate(); }
   },
   async saveImmo(doc) {
-    if (this.mode === 'sb') { await this.sbUpsert('immobilisation', doc); AS.list.set(doc.id, doc); if (S.view === 'amo') renderList(); return; }
+    if (this.mode === 'cloud') { await this.cloudUpsert('immobilisation', doc); AS.list.set(doc.id, doc); if (S.view === 'amo') renderList(); return; }
     if (this.mode === 'remote') {
       const ref = this.pref.collection('immobilisations').doc(doc.id);
       try { await ref.set(doc); } catch (e) { if (e && e.code === 'unavailable') { await new Promise(r => setTimeout(r, 600 + Math.random() * 800)); await ref.set(doc); } else throw e; }
@@ -2097,20 +2102,20 @@ const store = {
     }
   },
   async deleteImmo(id) {
-    if (this.mode === 'sb') { await this.sbDelete(id); AS.list.delete(id); return; }
+    if (this.mode === 'cloud') { await this.cloudDelete(id); AS.list.delete(id); return; }
     if (this.mode === 'remote') await this.pref.collection('immobilisations').doc(id).delete();
     else { const o = lsRead(); if (o.immos) delete o.immos[id]; lsWrite(o); AS.list.delete(id); }
   },
   async loadProfile() {
     let p = null;
-    if (this.mode === 'sb') { try { const { data } = await this.sb.from('documents').select('data').eq('id', 'profile').maybeSingle(); p = data ? data.data : null; } catch (e) {} }
+    if (this.mode === 'cloud') { try { const d = await this.col.doc('profile').get(); p = d.exists ? d.data().data : null; } catch (e) {} }
     else if (this.mode === 'remote') { try { const s = await this.pref.get(); if (s.exists) p = clone(s.data()); } catch (e) {} }
     else p = lsRead().profile || null;
     if (p) { S.profile = { accounts: p.accounts || [], tiers: p.tiers || [], journals: p.journals || [] }; rebuildAccounts(); if (S.cur) renderComputed(); }
   },
   watchList() {
-    if (this.mode === 'sb') {
-      this.sbFetch('bordereau').then(m => { S.list = m; S.listState = 'ready'; onListUpdate(); })
+    if (this.mode === 'cloud') {
+      this.cloudFetch('bordereau').then(m => { S.list = m; S.listState = 'ready'; onListUpdate(); })
         .catch(() => { S.listState = 'error'; renderList(); toast('Impossible de lire vos bordereaux pour le moment.'); });
       return;
     }
@@ -2126,7 +2131,7 @@ const store = {
     }
   },
   async saveBordereau(doc) {
-    if (this.mode === 'sb') { await this.sbUpsert('bordereau', doc); S.list.set(doc.id, doc); renderList(); return; }
+    if (this.mode === 'cloud') { await this.cloudUpsert('bordereau', doc); S.list.set(doc.id, doc); renderList(); return; }
     if (this.mode === 'remote') {
       const ref = this.pref.collection('bordereaux').doc(doc.id);
       try { await ref.set(doc); } catch (e) { if (e && e.code === 'unavailable') { await new Promise(r => setTimeout(r, 600 + Math.random() * 800)); await ref.set(doc); } else throw e; }
@@ -2137,12 +2142,12 @@ const store = {
     }
   },
   async deleteBordereau(id) {
-    if (this.mode === 'sb') { await this.sbDelete(id); S.list.delete(id); renderList(); return; }
+    if (this.mode === 'cloud') { await this.cloudDelete(id); S.list.delete(id); renderList(); return; }
     if (this.mode === 'remote') await this.pref.collection('bordereaux').doc(id).delete();
     else { const o = lsRead(); if (o.bordereaux) delete o.bordereaux[id]; lsWrite(o); S.list.delete(id); renderList(); }
   },
   async saveProfile(p) {
-    if (this.mode === 'sb') return this.sbUpsert('profile', p, 'profile');
+    if (this.mode === 'cloud') return this.cloudUpsert('profile', p, 'profile');
     if (this.mode === 'remote') await this.pref.set(p);
     else { const o = lsRead(); o.profile = p; lsWrite(o); }
   },
@@ -2198,7 +2203,7 @@ function setSave(state, msg, el = $('#saveState')) {
     state === 'saved' ? `Enregistré à ${hm}` : state === 'error' ? (msg || "Échec de l'enregistrement · nouvel essai dans 5 s") : '';
 }
 function renderStoreNote() {
-  $('#storeNote').textContent = S.mode === 'remote' || S.mode === 'sb'
+  $('#storeNote').textContent = S.mode === 'remote' || S.mode === 'cloud'
     ? 'Bordereaux et tableaux enregistrés dans votre compte : retrouvez-les depuis n’importe quel appareil.'
     : 'Documents enregistrés dans ce navigateur uniquement.';
 }
@@ -2324,7 +2329,7 @@ document.addEventListener('click', e => { if (!e.target.closest('.menu-wrap')) c
 $('#exportMenu').addEventListener('click', e => { const b = e.target.closest('[data-exp]'); if (b) { closeMenus(); startExport(b.dataset.exp); } });
 $('#moreMenu').addEventListener('click', e => {
   const b = e.target.closest('[data-more]'); if (!b) return;
-  if (b.dataset.more === 'dup') duplicateBordereau(); else if (b.dataset.more === 'del') deleteBordereau(); else { closeMenus(); showHelp(); }
+  if (b.dataset.more === 'dup') duplicateBordereau(); else if (b.dataset.more === 'del') deleteBordereau(); else if (b.dataset.more === 'help') { closeMenus(); showHelp(); }
 });
 $('#btnSide').addEventListener('click', () => $('#app').classList.toggle('side-open'));
 const SIDE_KEY = 'bordereaux-saisie:side';
@@ -3330,66 +3335,99 @@ async function amoBuildXlsx(d, R) {
 const xlLoadError = e => /Chargement|ExcelJS/.test(String(e && e.message));
 
 
-/* ================= Version en ligne : connexion Supabase ================= */
-const AUTH = { mode: 'login', resolve: null, sb: null };
+/* ================= Version en ligne : connexion Firebase ================= */
+const AUTH = { mode: 'login', resolve: null, fb: null };
 const AUTH_TXT = {
   login: ['Connexion', "Vos bordereaux et tableaux d'amortissement sont enregistrés dans votre compte.", 'Se connecter', 'Créer un compte'],
   signup: ['Créer un compte', 'Choisissez votre adresse e-mail et un mot de passe d’au moins 6 caractères.', 'Créer mon compte', "J'ai déjà un compte"],
   forgot: ['Mot de passe oublié', 'Indiquez votre adresse : vous recevrez un lien pour choisir un nouveau mot de passe.', 'Envoyer le lien', 'Retour à la connexion'],
-  newpwd: ['Nouveau mot de passe', 'Choisissez votre nouveau mot de passe (6 caractères minimum).', 'Enregistrer le mot de passe', ''],
 };
 function showAuth(mode, msg, ok) {
   AUTH.mode = mode; const t = AUTH_TXT[mode];
   $('#auth').hidden = false; $('#authTitle').textContent = t[0]; $('#authSub').textContent = t[1]; $('#authSubmit').textContent = t[2];
   $('#authSwitch').textContent = t[3]; $('#authSwitch').hidden = !t[3];
   $('#authForgot').hidden = mode !== 'login';
-  $('#authEmailField').hidden = mode === 'newpwd'; $('#authPwdField').hidden = mode === 'forgot';
+  $('#authPwdField').hidden = mode === 'forgot';
   $('#authPwd').autocomplete = mode === 'login' ? 'current-password' : 'new-password';
   authMsg(msg || '', ok);
-  setTimeout(() => (mode === 'newpwd' ? $('#authPwd') : $('#authEmail').value ? $('#authPwd') : $('#authEmail')).focus(), 0);
+  setTimeout(() => ($('#authEmail').value ? $('#authPwd') : $('#authEmail')).focus(), 0);
 }
 function authMsg(text, ok) { const m = $('#authMsg'); m.textContent = text; m.className = 'auth-msg ' + (ok ? 'ok' : 'err'); }
 function authErr(e) {
-  const m = String((e && (e.message || e.error_description)) || e || '');
-  if (/invalid login credentials/i.test(m)) return 'E-mail ou mot de passe incorrect.';
-  if (/email not confirmed/i.test(m)) return 'Confirmez d’abord votre adresse : ouvrez le lien reçu par e-mail.';
-  if (/already registered|already been registered/i.test(m)) return 'Un compte existe déjà avec cette adresse : connectez-vous.';
-  if (/rate limit|too many|security purposes/i.test(m)) return 'Trop de demandes rapprochées : réessayez dans quelques minutes.';
-  if (/password/i.test(m) && /(6|short|weak|least)/i.test(m)) return 'Mot de passe trop court ou trop simple : 6 caractères minimum.';
-  if (/valid email|invalid email|email address/i.test(m)) return 'Adresse e-mail invalide.';
-  if (/fetch|network/i.test(m)) return 'Connexion au serveur impossible. Vérifiez votre accès à internet.';
-  return 'Erreur : ' + m;
+  const c = String((e && e.code) || ''), m = String((e && e.message) || e || '');
+  if (/invalid-credential|wrong-password|user-not-found|invalid-login/.test(c)) return 'E-mail ou mot de passe incorrect.';
+  if (/email-already-in-use/.test(c)) return 'Un compte existe déjà avec cette adresse : connectez-vous.';
+  if (/too-many-requests/.test(c)) return 'Trop de tentatives rapprochées : réessayez dans quelques minutes.';
+  if (/weak-password/.test(c)) return 'Mot de passe trop simple : 6 caractères minimum.';
+  if (/invalid-email|missing-email/.test(c)) return 'Adresse e-mail invalide.';
+  if (/network-request-failed/.test(c)) return 'Connexion au serveur impossible. Vérifiez votre accès à internet.';
+  if (/operation-not-allowed/.test(c)) return 'La connexion par e-mail n’est pas activée dans Firebase (Authentication → Méthodes de connexion).';
+  if (/unauthorized-domain/.test(c)) return 'Ce site n’est pas dans les domaines autorisés de Firebase (Authentication → Paramètres).';
+  return 'Erreur : ' + (c || m);
 }
 function authDone(session) { const r = AUTH.resolve; AUTH.resolve = null; $('#auth').hidden = true; if (r) setTimeout(() => r(session), 0); }
 $('#authSwitch').addEventListener('click', () => showAuth(AUTH.mode === 'login' ? 'signup' : 'login'));
 $('#authForgot').addEventListener('click', () => showAuth('forgot'));
 $('#authForm').addEventListener('submit', async e => {
-  e.preventDefault(); const sb = AUTH.sb; if (!sb) return;
+  e.preventDefault(); const auth = AUTH.fb; if (!auth) return;
   const email = $('#authEmail').value.trim(), password = $('#authPwd').value; const btn = $('#authSubmit');
-  const back = location.origin + location.pathname;
-  if (AUTH.mode !== 'newpwd' && !/^\S+@\S+\.\S+$/.test(email)) { authMsg('Indiquez une adresse e-mail valide.'); return; }
+  if (!/^\S+@\S+\.\S+$/.test(email)) { authMsg('Indiquez une adresse e-mail valide.'); return; }
   if (AUTH.mode !== 'forgot' && password.length < 6) { authMsg('Le mot de passe doit faire au moins 6 caractères.'); return; }
   btn.disabled = true; authMsg('');
   try {
-    if (AUTH.mode === 'login') {
-      const { data, error } = await sb.auth.signInWithPassword({ email, password }); if (error) throw error; authDone(data.session);
-    } else if (AUTH.mode === 'signup') {
-      const { data, error } = await sb.auth.signUp({ email, password, options: { emailRedirectTo: back } }); if (error) throw error;
-      if (data.session) authDone(data.session);
-      else { showAuth('login', `Compte créé. Un e-mail de confirmation vient d'être envoyé à ${email} : cliquez sur le lien qu'il contient, puis connectez-vous.`, true); }
+    if (AUTH.mode === 'login') await auth.signInWithEmailAndPassword(email, password);
+    else if (AUTH.mode === 'signup') {
+      const cred = await auth.createUserWithEmailAndPassword(email, password);
+      try { await cred.user.sendEmailVerification(); } catch (err) {}
     } else if (AUTH.mode === 'forgot') {
-      const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: back }); if (error) throw error;
-      showAuth('login', `Si un compte existe pour ${email}, un lien de réinitialisation vient d'être envoyé.`, true);
-    } else if (AUTH.mode === 'newpwd') {
-      const { data, error } = await sb.auth.updateUser({ password }); if (error) throw error;
-      const { data: s } = await sb.auth.getSession(); toast('Mot de passe modifié'); authDone(s.session || (data && data.session));
+      await auth.sendPasswordResetEmail(email);
+      showAuth('login', `Si un compte existe pour ${email}, un e-mail vient d'être envoyé avec un lien pour choisir un nouveau mot de passe.`, true);
     }
   } catch (err) { authMsg(authErr(err)); }
   finally { btn.disabled = false; }
 });
 $('#btnLogout').addEventListener('click', async () => {
   try { await flushSave(); await amoFlush(); } catch (e) {}
-  if (AUTH.sb) await AUTH.sb.auth.signOut(); location.reload();
+  if (AUTH.fb) await AUTH.fb.signOut(); location.reload();
+});
+
+/* ================= Sauvegarde / restauration (fichier .json) ================= */
+const BACKUP_FORMAT = 'compta-cours';
+const plural = (n, one, many) => `${n} ${n > 1 ? many : one}`;
+async function exportBackup() {
+  closeMenus();
+  try { await flushSave(); await amoFlush(); } catch (e) {}
+  const bdx = new Map(S.list); if (S.cur && !S.cur.example) bdx.set(S.cur.id, serialize(S.cur));
+  const immos = new Map(AS.list); if (AS.cur && !AS.cur.example) immos.set(AS.cur.id, amoSerialize(AS.cur));
+  if (!bdx.size && !immos.size) { toast('Aucun document enregistré à sauvegarder.'); return; }
+  const data = { format: BACKUP_FORMAT, version: 1, exportedAt: new Date().toISOString(), profile: clone(S.profile), bordereaux: [...bdx.values()], immobilisations: [...immos.values()] };
+  await saveFile(`compta-cours-sauvegarde-${new Date().toISOString().slice(0, 10)}.json`, new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' }));
+}
+function pickBackup() { closeMenus(); const i = $('#backupFile'); i.value = ''; i.click(); }
+document.addEventListener('click', e => { const b = e.target.closest('[data-bk]'); if (!b) return; if (b.dataset.bk === 'save') exportBackup(); else pickBackup(); });
+$('#backupFile').addEventListener('change', async e => {
+  const f = e.target.files && e.target.files[0]; if (!f) return;
+  let data; try { data = JSON.parse(await f.text()); } catch (err) { toast("Ce fichier n'est pas une sauvegarde lisible."); return; }
+  if (!data || data.format !== BACKUP_FORMAT || !Array.isArray(data.bordereaux) || !Array.isArray(data.immobilisations)) { toast("Ce fichier n'est pas une sauvegarde de cette application."); return; }
+  const nb = data.bordereaux.length, ni = data.immobilisations.length;
+  const same = data.bordereaux.filter(d => S.list.has(d.id)).length + data.immobilisations.filter(d => AS.list.has(d.id)).length;
+  const ok = await confirmBox('Restaurer cette sauvegarde ?', `Elle contient ${plural(nb, 'bordereau', 'bordereaux')} et ${plural(ni, "tableau d'amortissement", "tableaux d'amortissement")}${same ? `, dont ${same} déjà présent${same > 1 ? 's' : ''} ici et remplacé${same > 1 ? 's' : ''} par la version de la sauvegarde` : ''}. Vos comptes, tiers et journaux personnels s'ajoutent à ceux déjà présents.`, 'Restaurer', false);
+  if (!ok) return;
+  toast('Restauration en cours…');
+  try {
+    const p = data.profile || {};
+    (p.accounts || []).forEach(x => upsert(S.profile.accounts, x));
+    (p.tiers || []).forEach(x => upsert(S.profile.tiers, x));
+    (p.journals || []).forEach(x => upsert(S.profile.journals, x, 'c'));
+    rebuildAccounts(); await store.saveProfile(clone(S.profile));
+    for (const d of data.bordereaux) { await store.saveBordereau(d); S.list.set(d.id, d); }
+    for (const d0 of data.immobilisations) { const d = amoSerialize(amoNormalize(clone(d0))); await store.saveImmo(d); AS.list.set(d.id, d); }
+  } catch (err) { console.error(err); toast("La restauration s'est interrompue. Vérifiez votre connexion et réessayez."); return; }
+  const newest = arr => arr.slice().sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))[0];
+  if (nb && (S.cur.example || data.bordereaux.some(d => d.id === S.cur.id))) { S.dirty = false; await openBordereau((data.bordereaux.find(d => d.id === S.cur.id) || newest(data.bordereaux)).id); }
+  if (ni && (AS.cur.example || data.immobilisations.some(d => d.id === AS.cur.id))) { AS.dirty = false; await amoOpen((data.immobilisations.find(d => d.id === AS.cur.id) || newest(data.immobilisations)).id); }
+  renderComputed(); renderList();
+  toast(`Sauvegarde restaurée : ${plural(nb, 'bordereau', 'bordereaux')}, ${plural(ni, 'tableau', 'tableaux')}.`);
 });
 
 /* ================= Démarrage ================= */
