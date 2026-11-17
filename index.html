@@ -9,7 +9,7 @@
 <title>Bordereau de saisie</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
 <style>
 /* Layout : colonne des documents à gauche (bordereaux ou tableaux d'amortissement), espace de travail pleine hauteur au centre.
    Palette sobre : neutres froids, un bleu ardoise pour l'accent, l'ambre réservé aux écarts. */
@@ -18,9 +18,9 @@
   --rule:#E1E5EB; --rule-strong:#C5CCD6; --accent:#2D4A73; --accent-ink:#FFFFFF; --accent-soft:#E5EBF4;
   --warn:#9A5800; --warn-soft:#FBEED8; --err:#B3261E; --err-soft:#F9E0DE; --focus:#3A5E93;
   --scrim:rgba(15,23,42,.38); --shadow:0 10px 30px rgba(15,23,42,.14),0 2px 6px rgba(15,23,42,.07);
-  --f-ui:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  --f-grid:"IBM Plex Sans Condensed","Arial Narrow","Roboto Condensed",system-ui,sans-serif;
-  --f-num:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+  --f-ui:"Source Sans 3","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+  --f-grid:"Source Sans 3","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+  --f-num:"Source Sans 3","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#101318; --surface:#161A21; --band:#1B2029; --ink:#E3E6EB; --muted:#98A1AE;
@@ -118,7 +118,7 @@ kbd{font-family:var(--f-num);font-size:11px;border:1px solid var(--rule-strong);
 
 /* ---------- Grille ---------- */
 .gridwrap{flex:1;min-height:0;overflow:auto;background:var(--surface);border:1px solid var(--rule-strong);border-radius:8px}
-table.grid{border-collapse:separate;border-spacing:0;width:100%;min-width:1280px;table-layout:fixed;font-family:var(--f-grid);font-size:13.5px}
+table.grid{border-collapse:separate;border-spacing:0;width:100%;min-width:1280px;table-layout:fixed;font-family:var(--f-grid);font-size:14.5px;font-variant-numeric:tabular-nums}
 .grid thead th{position:sticky;top:0;z-index:3;background:var(--surface);text-align:left;font-weight:600;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding:9px 7px 8px;border-bottom:1px solid var(--rule-strong);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .grid thead th.r{text-align:right}
 .grid tbody td{border-bottom:1px solid var(--rule);padding:0;height:31px;vertical-align:middle;background:var(--surface)}
@@ -131,12 +131,12 @@ table.grid{border-collapse:separate;border-spacing:0;width:100%;min-width:1280px
 .grid tr.g-bad td.c-n::before{background:var(--warn)}
 input.cell{display:block;width:100%;height:31px;border:0;background:transparent;padding:0 8px;outline:none;border-radius:0;text-overflow:ellipsis}
 input.cell:focus{background:var(--surface);box-shadow:inset 0 0 0 2px var(--focus);border-radius:3px;text-overflow:clip}
-input.cell.mono{font-size:12.5px}
+input.cell.mono{font-size:14.5px}
 input.cell.up{text-transform:uppercase}
 input.cell.amt{text-align:right}
 input.cell.auto{color:var(--accent);font-style:italic}
 input.cell.derived{color:var(--muted)}
-input.cell.note{font-size:12.5px}
+input.cell.note{font-size:13.5px}
 input.cell.note.derived{font-family:var(--f-num);font-size:12px}
 input.cell.dim::placeholder{color:transparent}
 input.cell.dim{opacity:.55}
@@ -147,6 +147,15 @@ input.cell::placeholder{color:var(--muted);opacity:.7;font-style:italic}
 .del{border:0;background:transparent;color:var(--muted);cursor:pointer;width:26px;height:26px;border-radius:4px;opacity:0;font-size:16px;line-height:1}
 .grid tr:hover .del,.grid tr:focus-within .del{opacity:1}
 .del:hover{color:var(--err);background:var(--err-soft)}
+.add{border:0;background:transparent;color:var(--muted);cursor:pointer;width:22px;height:26px;border-radius:4px;opacity:0;font-size:16px;line-height:1;padding:0}
+.grid tr:hover .add,.grid tr:focus-within .add{opacity:1}
+.add:hover{color:var(--accent);background:var(--accent-soft)}
+.grid td.c-act{white-space:nowrap}
+.grid thead th{position:sticky}
+.grid thead th .rs{position:absolute;top:0;right:-4px;width:9px;height:100%;cursor:col-resize;z-index:4;touch-action:none}
+.grid thead th .rs::after{content:"";position:absolute;top:22%;bottom:22%;left:4px;width:1px;background:var(--rule-strong)}
+.grid thead th .rs:hover::after,.grid.resizing thead th .rs.on::after{background:var(--accent);width:2px;top:0;bottom:0}
+.grid.resizing{cursor:col-resize;user-select:none}
 
 /* ---------- Totaux ---------- */
 .totals{display:flex;align-items:center;gap:22px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--rule-strong);border-radius:8px;padding:10px 14px}
@@ -261,7 +270,7 @@ table.amo th{position:sticky;z-index:2;background:var(--surface);font-weight:600
 table.amo thead tr:first-child th{top:0;text-align:center;color:var(--ink);background:var(--bg);border-bottom:1px solid var(--rule-strong)}
 table.amo thead tr:nth-child(2) th{top:31px;border-bottom:1px solid var(--rule-strong)}
 table.amo th.ex{text-align:left;vertical-align:bottom;background:var(--surface)!important;color:var(--muted)!important}
-table.amo td{padding:6px 8px;text-align:right;font-family:var(--f-num);font-size:12.5px;font-variant-numeric:tabular-nums;border-bottom:1px solid var(--rule);white-space:nowrap;position:relative;cursor:cell;outline:none}
+table.amo td{padding:6px 8px;text-align:right;font-family:var(--f-num);font-size:14px;font-variant-numeric:tabular-nums;border-bottom:1px solid var(--rule);white-space:nowrap;position:relative;cursor:cell;outline:none}
 table.amo tbody tr:nth-child(even) td{background:var(--band)}
 table.amo td.ex{text-align:left;font-family:var(--f-grid);font-size:13px;font-weight:600}
 table.amo td.tx{text-align:left;font-family:var(--f-grid);font-size:12px;color:var(--muted)}
@@ -357,7 +366,7 @@ table.amo td.has-c::after{content:"";position:absolute;top:0;right:0;border-styl
       <table class="grid" id="grid" aria-label="Lignes d'écritures">
         <colgroup>
           <col style="width:52px"><col style="width:92px"><col style="width:66px"><col style="width:90px"><col style="width:98px">
-          <col style="width:170px"><col><col style="width:108px"><col style="width:108px"><col style="width:120px"><col style="width:30px">
+          <col style="width:170px"><col><col style="width:108px"><col style="width:108px"><col style="width:120px"><col style="width:56px">
         </colgroup>
         <thead><tr>
           <th class="r" title="Numéro de ligne">Ligne</th><th>Date</th><th>Journal</th><th title="N° compte général">Compte gén.</th><th title="N° compte de tiers">Compte tiers</th>
@@ -1383,7 +1392,7 @@ function fmt(n, sep = ' ') {
   const neg = n < 0; const [i, d] = Math.abs(n).toFixed(2).split('.');
   return (neg ? '-' : '') + i.replace(/\B(?=(\d{3})+(?!\d))/g, sep) + ',' + d;
 }
-const isoToFr = s => ISO.test(s || '') ? `${s.slice(8, 10)}/${s.slice(5, 7)}/${s.slice(0, 4)}` : (s || '');
+const isoToFr = s => ISO.test(s || '') ? `${s.slice(8, 10)}/${s.slice(5, 7)}/${s.slice(2, 4)}` : (s || '');
 function monthLabel(p) { if (!/^\d{4}-\d{2}$/.test(p || '')) return ''; const m = MONTHS[+p.slice(5) - 1]; return m.charAt(0).toUpperCase() + m.slice(1) + ' ' + p.slice(0, 4); }
 function thisMonth() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); }
 function rel(ts) {
@@ -1545,7 +1554,7 @@ function createRow(L) {
   const tr = document.createElement('tr'); tr.dataset.id = L.id;
   tr.innerHTML = `<td class="c-n"></td>` + CELLS.map(([col, cls, lab]) =>
     `<td><input id="${col}-${L.id}" data-col="${col}" class="cell ${cls}" aria-label="${lab}" autocomplete="off" spellcheck="false"${col === 'd' || col === 'c' ? ' inputmode="decimal"' : ''}></td>`).join('') +
-    `<td class="c-act"><button class="del" type="button" data-act="del" tabindex="-1" aria-label="Supprimer la ligne" title="Supprimer la ligne (Ctrl+Suppr)">×</button></td>`;
+    `<td class="c-act"><button class="add" type="button" data-act="add" tabindex="-1" aria-label="Insérer une ligne dessous" title="Insérer une ligne dessous (Ctrl+Entrée)">+</button><button class="del" type="button" data-act="del" tabindex="-1" aria-label="Supprimer la ligne" title="Supprimer la ligne (Ctrl+Suppr)">×</button></td>`;
   return tr;
 }
 function renderAll() {
@@ -1603,7 +1612,7 @@ function syncRow(tr, L, isTrail) {
       cl.toggle('warn', !!L.j && !journalOf(L.j));
       inp.title = journalOf(L.j)?.l || '';
     }
-    inp.placeholder = isTrail && col === 'op' ? 'Nouvelle ligne : tapez ici ou dans n’importe quelle cellule' : (col === 'date' && isTrail ? 'jj/mm' : '');
+    inp.placeholder = isTrail && col === 'op' ? 'Nouvelle ligne : tapez ici ou dans n’importe quelle cellule' : (col === 'date' && isTrail ? 'jj/mm/aa' : '');
   }
 }
 function renderComputed() {
@@ -1796,7 +1805,33 @@ tbody.addEventListener('input', e => {
 });
 tbody.addEventListener('click', e => {
   const b = e.target.closest('[data-act="del"]'); if (b) deleteLine(lineIndexOf(b));
+  const a = e.target.closest('[data-act="add"]'); if (a) { const i = lineIndexOf(a); if (i >= 0) insertBelow(i); }
 });
+
+/* Largeur des colonnes réglable comme dans un tableur (glisser le bord d'un en-tête, double-clic pour revenir à la largeur d'origine) */
+const COLW_KEY = 'bordereaux-saisie:colw';
+const gridEl = $('#grid'), gridCols = [...gridEl.querySelectorAll('colgroup col')];
+const COLW_DEFAULT = gridCols.map(c => c.style.width || '');
+function applyColWidths(ws) {
+  if (!ws) { gridCols.forEach((c, k) => { c.style.width = COLW_DEFAULT[k]; }); gridEl.style.width = ''; gridEl.style.minWidth = ''; return; }
+  gridCols.forEach((c, k) => { c.style.width = ws[k] + 'px'; });
+  gridEl.style.width = ws.reduce((t, w) => t + w, 0) + 'px'; gridEl.style.minWidth = '0';
+}
+function currentColWidths() { return [...gridEl.querySelectorAll('thead th')].map(th => Math.round(th.getBoundingClientRect().width)); }
+[...gridEl.querySelectorAll('thead th')].forEach((th, k) => {
+  if (k === gridCols.length - 1) return;
+  const h = document.createElement('span'); h.className = 'rs'; h.title = 'Glisser pour élargir la colonne · double-clic : largeur d’origine'; th.appendChild(h);
+  h.addEventListener('pointerdown', e => {
+    e.preventDefault(); const ws = currentColWidths(); const x0 = e.clientX, w0 = ws[k];
+    h.setPointerCapture(e.pointerId); gridEl.classList.add('resizing'); h.classList.add('on'); applyColWidths(ws);
+    const mv = ev => { ws[k] = Math.max(36, Math.round(w0 + ev.clientX - x0)); applyColWidths(ws); };
+    const up = () => { h.removeEventListener('pointermove', mv); gridEl.classList.remove('resizing'); h.classList.remove('on');
+      try { localStorage.setItem(COLW_KEY, JSON.stringify(ws)); } catch (err) {} };
+    h.addEventListener('pointermove', mv); h.addEventListener('pointerup', up, { once: true }); h.addEventListener('pointercancel', up, { once: true });
+  });
+  h.addEventListener('dblclick', () => { try { localStorage.removeItem(COLW_KEY); } catch (err) {} applyColWidths(null); toast('Largeurs des colonnes rétablies'); });
+});
+try { const ws = JSON.parse(localStorage.getItem(COLW_KEY) || 'null'); if (Array.isArray(ws) && ws.length === gridCols.length) applyColWidths(ws); } catch (err) {}
 tbody.addEventListener('paste', onPaste);
 
 /* ================= Opérations sur les lignes ================= */
@@ -3167,33 +3202,42 @@ async function buildXlsx(b) {
     alignment: { vertical: 'middle', wrapText: true, horizontal: col <= 3 ? 'center' : (col === 8 || col === 9 ? 'right' : 'left'), indent: col >= 4 && col !== 8 && col !== 9 ? 1 : 0 } }));
   const r0 = 5; const pcgLast = xPcgSheet(wb); if (tiers.length) xTiersSheet(wb, tiers);
   const srcLines = b.lines.filter(L => !isEmptyLine(L));
-  rows.forEach((x, k) => {
-    const r = r0 + k, row = ws.getRow(r), L = srcLines[k];
-    const derived = (L.tiers && tiersMap.get(L.tiers)) || accLabel(L.acc);
-    const manual = !!L.lib && L.lib !== derived;
-    let date = x.date || '';
-    if (x.iso) { const [y, m, dd] = x.iso.split('-').map(Number); date = new Date(Date.UTC(y, m - 1, dd)); }
-    row.getCell(1).value = x.n;
-    row.getCell(2).value = date;
-    row.getCell(3).value = x.j || '';
-    row.getCell(4).value = x.acc || '';
-    row.getCell(5).value = x.tiers || '';
-    row.getCell(6).value = manual ? L.lib : { formula: xLabelFormula(`D${r}`, tiers.length ? `E${r}` : null), result: x.lib || '' };
-    row.getCell(7).value = x.op || '';
-    if (x.d != null) row.getCell(8).value = x.d;
-    if (x.c != null) row.getCell(9).value = x.c;
-    if (x.note) row.getCell(10).value = x.note;
+  const layout = []; let prevE = null;
+  rows.forEach((x, k) => { const e = srcLines[k].e; if (prevE !== null && e !== prevE) layout.push(null); layout.push(k); prevE = e; });
+  for (let k = 0; k < 5; k++) layout.push(null);
+  ws.mergeCells(3, 1, 3, 10);
+  xStyle(ws.getCell(3, 1), { value: "Les lignes grisées sont prêtes à recevoir une écriture : l'intitulé du compte s'y affiche tout seul. Pour en ajouter d'autres, insérez une ligne dans le tableau (clic droit → Insérer) et recopiez une ligne grisée.",
+    font: xFont({ size: 9, italic: true, color: { argb: XL.muted } }), alignment: { vertical: 'middle' } });
+  ws.getRow(3).height = 16;
+  layout.forEach((k, idx) => {
+    const r = r0 + idx, row = ws.getRow(r), blank = k === null;
+    const labelF = { formula: xLabelFormula(`D${r}`, tiers.length ? `E${r}` : null), result: '' };
+    if (blank) row.getCell(6).value = labelF;
+    else {
+      const x = rows[k], L = srcLines[k];
+      const derived = (L.tiers && tiersMap.get(L.tiers)) || accLabel(L.acc);
+      const manual = !!L.lib && L.lib !== derived;
+      let date = x.date || '';
+      if (x.iso) { const [y, m, dd] = x.iso.split('-').map(Number); date = new Date(Date.UTC(y, m - 1, dd)); }
+      row.getCell(1).value = x.n; row.getCell(2).value = date; row.getCell(3).value = x.j || '';
+      row.getCell(4).value = x.acc || ''; row.getCell(5).value = x.tiers || '';
+      row.getCell(6).value = manual ? L.lib : { ...labelF, result: x.lib || '' };
+      row.getCell(7).value = x.op || '';
+      if (x.d != null) row.getCell(8).value = x.d;
+      if (x.c != null) row.getCell(9).value = x.c;
+      if (x.note) row.getCell(10).value = x.note;
+      if (manual) row.getCell(6).note = "Intitulé saisi à la main : il ne suit pas le numéro de compte.";
+    }
     for (let c = 1; c <= 10; c++) {
       const cell = row.getCell(c);
       cell.font = xFont(c === 1 ? { color: { argb: XL.muted } } : c === 10 ? { italic: true, color: { argb: XL.muted } } : {});
-      cell.border = xBox(); if (x.band) cell.fill = xFill(XL.band);
+      cell.border = xBox(); if (blank) cell.fill = xFill(XL.band);
       cell.alignment = { vertical: 'middle', horizontal: c <= 3 ? 'center' : (c === 8 || c === 9 ? 'right' : 'left'), indent: c >= 4 && c !== 8 && c !== 9 ? 1 : 0 };
     }
-    row.getCell(2).numFmt = 'dd/mm/yyyy'; row.getCell(4).numFmt = '@'; row.getCell(5).numFmt = '@';
+    row.getCell(2).numFmt = 'dd/mm/yy'; row.getCell(4).numFmt = '@'; row.getCell(5).numFmt = '@';
     row.getCell(8).numFmt = XL.NUM; row.getCell(9).numFmt = XL.NUM;
-    if (manual) row.getCell(6).note = "Intitulé saisi à la main : il ne suit pas le numéro de compte.";
   });
-  const last = r0 + rows.length - 1, rt = last + 1, rs = rt + 1;
+  const last = r0 + layout.length - 1, rt = last + 1, rs = rt + 1;
   const tot = ws.getRow(rt);
   tot.getCell(7).value = 'Totaux';
   tot.getCell(8).value = { formula: `SUM(H${r0}:H${last})`, result: s.d };
@@ -3212,7 +3256,7 @@ async function buildXlsx(b) {
   sol.getCell(8).numFmt = '#,##0.00;-#,##0.00;0.00'; sol.getCell(9).font = xFont({ bold: true, color: { argb: XL.navy } });
   ws.addConditionalFormatting({ ref: `H${rs}:I${rs}`, rules: [{ type: 'expression', priority: 1, formulae: [`ROUND($H$${rt}-$I$${rt},2)<>0`], style: { font: { bold: true, color: { argb: XL.err } } } }] });
   ws.autoFilter = `A4:J${last}`;
-  if (rows.length) xAccountValidation(ws, `D${r0}:D${last}`, pcgLast);
+  xAccountValidation(ws, `D${r0}:D${last}`, pcgLast);
   xPrint(ws, b.name || 'Bordereau', '4:4');
   return xBlob(wb);
 }
