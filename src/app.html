@@ -145,10 +145,15 @@ input.cell::placeholder{color:var(--muted);opacity:.7;font-style:italic}
 .add:hover{color:var(--accent);background:var(--accent-soft)}
 .grid td.c-act{white-space:nowrap}
 .grid thead th{position:sticky}
-.grid thead th .rs{position:absolute;top:0;right:-4px;width:9px;height:100%;cursor:col-resize;z-index:4;touch-action:none}
-.grid thead th .rs::after{content:"";position:absolute;top:22%;bottom:22%;left:4px;width:1px;background:var(--rule-strong)}
+.grid thead th .rs{position:absolute;top:0;right:0;width:8px;height:100%;cursor:col-resize;z-index:4;touch-action:none}
+.grid thead th .rs::after{content:"";position:absolute;top:22%;bottom:22%;right:0;width:1px;background:var(--rule-strong)}
 .grid thead th .rs:hover::after,.grid.resizing thead th .rs.on::after{background:var(--accent);width:2px;top:0;bottom:0}
 .grid.resizing{cursor:col-resize;user-select:none}
+table.amo th .rs{position:absolute;top:0;right:0;width:8px;height:100%;cursor:col-resize;z-index:4;touch-action:none}
+table.amo th .rs::after{content:"";position:absolute;top:22%;bottom:22%;right:0;width:1px;background:var(--rule-strong)}
+table.amo th .rs:hover::after,table.amo.resizing th .rs.on::after{background:var(--accent);width:2px;top:0;bottom:0}
+table.amo.resizing{cursor:col-resize;user-select:none}
+table.amo td{overflow:hidden;text-overflow:ellipsis}
 
 /* ---------- Totaux ---------- */
 .totals{display:flex;align-items:center;gap:22px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--rule-strong);border-radius:8px;padding:10px 14px}
@@ -2942,22 +2947,53 @@ function amoRender() {
   $('#a_compteHint').textContent = a ? `${a.n} · ${a.l}` : (p.compte ? 'Compte absent du plan comptable' : '');
   const w = $('#amoWarn'); w.hidden = !R.warn.length; w.innerHTML = R.warn.map(x => `<span>${esc(x)}</span>`).join('');
   if (!R.ok) {
+    amoTable.style.tableLayout = amoTable.style.width = amoTable.style.minWidth = '';
     amoTable.innerHTML = `<tbody><tr><td class="amo-empty" style="cursor:default">Complétez les paramètres ci-dessus : le tableau se calcule au fur et à mesure.</td></tr></tbody>`;
   } else {
     const cols = amoVisibleCols(R); const groups = [];
     cols.forEach(c => { if (!c.g) return; const l = groups[groups.length - 1]; if (l && l.g === c.g) l.n++; else groups.push({ g: c.g, n: 1 }); });
-    let h = '<thead><tr><th rowspan="2" class="ex">Exercice</th>' + groups.map(g => `<th colspan="${g.n}" class="gs" scope="colgroup">${AMO_GROUPS[g.g]}</th>`).join('') + '</tr><tr>' +
-      cols.filter(c => c.g).map(c => `<th scope="col"${c.first ? ' class="gs"' : ''}>${c.h}</th>`).join('') + '</tr></thead><tbody>';
+    let h = '<thead><tr><th rowspan="2" class="ex" data-ck="ex">Exercice</th>' + groups.map(g => `<th colspan="${g.n}" class="gs" scope="colgroup">${AMO_GROUPS[g.g]}</th>`).join('') + '</tr><tr>' +
+      cols.filter(c => c.g).map(c => `<th scope="col" data-ck="${c.k}"${c.first ? ' class="gs"' : ''}>${c.h}</th>`).join('') + '</tr></thead><tbody>';
     R.rows.forEach((row, ri) => { h += '<tr>' + cols.map(c => amoCell(`r${ri}:${c.k}`, c, row[c.k])).join('') + '</tr>'; });
     h += '</tbody><tfoot><tr>' + cols.map(c => amoCell(`tot:${c.k}`, c, c.k === 'ex' ? 'Total' : (c.k in R.tot ? R.tot[c.k] : null))).join('') + '</tr></tfoot>';
     const hadFocus = amoTable.contains(document.activeElement);
     amoTable.innerHTML = h;
+    amoResizable(cols);
     const sel = AS.sel && amoTable.querySelector(`td[data-k="${AS.sel}"]`);
     const tgt = sel || amoTable.querySelector('tbody td');
     if (tgt) { tgt.tabIndex = 0; if (sel) sel.classList.add('sel'); if (hadFocus && sel) sel.focus(); }
   }
   amoRenderComments();
   $('#amoNotes').innerHTML = '<h3>Détail du calcul</h3>' + (R.notes.length ? '<ul>' + R.notes.map(n => `<li>${esc(n)}</li>`).join('') + '</ul>' : '<p>Le détail apparaîtra une fois les paramètres complétés.</p>');
+}
+/* Largeur des colonnes du tableau d'amortissement, réglable comme dans un tableur */
+const AMO_COLW_KEY = 'bordereaux-saisie:amo-colw';
+function amoColW() { try { return JSON.parse(localStorage.getItem(AMO_COLW_KEY) || '{}') || {}; } catch (e) { return {}; } }
+function amoApplyW(cols, map) {
+  if (!cols.every(c => map[c.k])) { amoTable.style.tableLayout = amoTable.style.width = amoTable.style.minWidth = ''; const cg = amoTable.querySelector('colgroup'); if (cg) cg.remove(); return; }
+  let cg = amoTable.querySelector('colgroup');
+  if (!cg) { cg = document.createElement('colgroup'); cols.forEach(() => cg.appendChild(document.createElement('col'))); amoTable.prepend(cg); }
+  cols.forEach((c, k) => { cg.children[k].style.width = map[c.k] + 'px'; });
+  amoTable.style.tableLayout = 'fixed'; amoTable.style.minWidth = '0';
+  amoTable.style.width = cols.reduce((t, c) => t + map[c.k], 0) + 'px';
+}
+function amoResizable(cols) {
+  amoApplyW(cols, amoColW());
+  amoTable.querySelectorAll('th[data-ck]').forEach(th => {
+    const k = th.dataset.ck; const h = document.createElement('span'); h.className = 'rs';
+    h.title = 'Glisser pour élargir la colonne · double-clic : largeur d’origine'; th.appendChild(h);
+    h.addEventListener('pointerdown', e => {
+      e.preventDefault(); e.stopPropagation();
+      const map = amoColW(); amoTable.querySelectorAll('th[data-ck]').forEach(t => { map[t.dataset.ck] = Math.round(t.getBoundingClientRect().width); });
+      const x0 = e.clientX, w0 = map[k];
+      h.setPointerCapture(e.pointerId); amoTable.classList.add('resizing'); h.classList.add('on'); amoApplyW(cols, map);
+      const mv = ev => { map[k] = Math.max(44, Math.round(w0 + ev.clientX - x0)); amoApplyW(cols, map); };
+      const up = () => { h.removeEventListener('pointermove', mv); amoTable.classList.remove('resizing'); h.classList.remove('on');
+        try { localStorage.setItem(AMO_COLW_KEY, JSON.stringify(map)); } catch (err) {} };
+      h.addEventListener('pointermove', mv); h.addEventListener('pointerup', up, { once: true }); h.addEventListener('pointercancel', up, { once: true });
+    });
+    h.addEventListener('dblclick', e => { e.stopPropagation(); try { localStorage.removeItem(AMO_COLW_KEY); } catch (err) {} amoApplyW(cols, {}); toast('Largeurs des colonnes rétablies'); });
+  });
 }
 function cellOrder(key) { const [r, k] = key.split(':'); return (r === 'tot' ? 1e4 : +r.slice(1)) * 100 + AMO_COLS.findIndex(c => c.k === k); }
 function cellName(key) {
@@ -3258,7 +3294,7 @@ async function amoBuildXlsx(d, R) {
   const ws = wb.addWorksheet('Amortissement', { views: [{ showGridLines: false }], properties: { tabColor: { argb: XL.navy } } });
   const cols = amoVisibleCols(R); const nC = cols.length;
   const sub = p.sub.on ? +p.sub.montant || 0 : 0;
-  const yearTxt = /^\d{4}$/.test(String(p.ex0 || '').trim()) ? String(p.ex0).trim() : (p.ex0 || 'N');
+  const yearTxt = /^\d{4}$/.test(String(p.ex0 || '').trim()) ? String(p.ex0).trim().slice(2) : (p.ex0 || 'N');
   const dt = v => { const x = parseDM(v); return x ? `${dmStr(x)}/${yearTxt}` : ''; };
   // Blocs de paramètres : [titre, [[libellé, valeur, format]]]
   const blocks = [
