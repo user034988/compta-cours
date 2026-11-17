@@ -52,14 +52,17 @@ button,input,select{font:inherit;color:inherit}
 .bitem .mt{font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .side-foot{font-size:12px;color:var(--muted);border-top:1px solid var(--rule);padding-top:10px}
 .side-empty{font-size:13px;color:var(--muted);padding:6px 10px}
-.side-toggle{margin-left:auto;font-size:17px;line-height:1;color:var(--muted)}
+.theme-btn{margin-left:auto;padding:5px 7px;color:var(--muted);line-height:0}
+.theme-btn:hover{color:var(--ink)}
+.theme-btn svg{width:17px;height:17px}
+.side-toggle{font-size:17px;line-height:1;color:var(--muted)}
 .side-toggle:hover{color:var(--ink)}
 @media (min-width: 861px){
   .app{transition:grid-template-columns .2s ease}
   .app.side-mini{grid-template-columns:44px minmax(0,1fr)}
   .app.side-mini .brand{flex-direction:column;gap:8px;padding:4px 0}
   .app.side-mini .brand>div,.app.side-mini .seg .lbl,.app.side-mini .side-label,.app.side-mini .blist,.app.side-mini .side-foot,.app.side-mini #btnNew .lbl{display:none}
-  .app.side-mini .side-toggle{margin-left:0}
+  .app.side-mini .side-toggle,.app.side-mini .theme-btn{margin-left:0}
   .app.side-mini .seg{grid-template-columns:1fr;padding:3px}
   .app.side-mini .seg button{display:flex;justify-content:center;padding:8px 0}
   .app.side-mini .seg .ico{display:block}
@@ -298,6 +301,7 @@ table.amo td.has-c::after{content:"";position:absolute;top:0;right:0;border-styl
     <div class="brand">
       <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect x="1" y="1" width="28" height="28" rx="6" fill="var(--accent)"/><path d="M8 10h14M8 15h14M8 20h14" stroke="var(--accent-ink)" stroke-width="1.6" stroke-linecap="round"/><path d="M15 7v16" stroke="var(--accent-ink)" stroke-width="1.6" stroke-linecap="round" opacity=".55"/></svg>
       <div><strong>Comptabilité</strong><span>Saisie et amortissements</span></div>
+      <button class="btn icon ghost theme-btn" id="btnTheme" type="button" aria-label="Thème : automatique" title="Thème : automatique (cliquer pour passer en mode clair)"></button>
       <button class="btn icon ghost side-toggle" id="btnCollapse" type="button" aria-label="Réduire le panneau" aria-expanded="true" title="Réduire le panneau (Ctrl+B)">«</button>
     </div>
     <div class="seg" id="viewSeg" role="tablist" aria-label="Type de document">
@@ -3509,6 +3513,24 @@ $('#backupFile').addEventListener('change', async e => {
   renderComputed(); renderList();
   toast(`Sauvegarde restaurée : ${plural(nb, 'bordereau', 'bordereaux')}, ${plural(ni, 'tableau', 'tableaux')}.`);
 });
+
+/* ================= Thème : automatique, clair ou sombre ================= */
+const THEME_KEY = 'bordereaux-saisie:theme';
+const THEME_ICON = {
+  auto: '<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="6.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 3.5a6.5 6.5 0 0 1 0 13z" fill="currentColor"/></svg>',
+  light: '<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="3.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 1.8v2.4M10 15.8v2.4M1.8 10h2.4M15.8 10h2.4M4.2 4.2l1.7 1.7M14.1 14.1l1.7 1.7M4.2 15.8l1.7-1.7M14.1 5.9l1.7-1.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+  dark: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M15.8 12.6A6.8 6.8 0 0 1 7.4 4.2a6.8 6.8 0 1 0 8.4 8.4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>',
+};
+const THEME_TXT = { auto: 'automatique (comme votre appareil)', light: 'mode clair', dark: 'mode sombre' };
+const THEME_NEXT = { auto: 'light', light: 'dark', dark: 'auto' };
+function setTheme(t, remember) {
+  if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); else document.documentElement.removeAttribute('data-theme');
+  const b = $('#btnTheme'); b.innerHTML = THEME_ICON[t];
+  b.setAttribute('aria-label', 'Thème : ' + THEME_TXT[t]); b.title = `Thème : ${THEME_TXT[t]} · cliquer pour passer en ${THEME_TXT[THEME_NEXT[t]]}`; b.dataset.t = t;
+  if (remember) { try { localStorage.setItem(THEME_KEY, t); } catch (e) {} toast('Thème : ' + THEME_TXT[t]); }
+}
+$('#btnTheme').addEventListener('click', () => setTheme(THEME_NEXT[$('#btnTheme').dataset.t || 'auto'], true));
+{ let t = null; try { t = localStorage.getItem(THEME_KEY); } catch (e) {} setTheme(t === 'light' || t === 'dark' ? t : 'auto', false); }
 
 /* ================= Démarrage ================= */
 rebuildAccounts();
