@@ -1,9 +1,10 @@
 # Comptabilité · saisie et amortissements
 
-Site pour les cours de comptabilité :
+Site pour les cours de comptabilité. Le travail est rangé en **dossiers**, comme des classeurs Excel : chaque dossier contient plusieurs feuilles (onglets en bas de l'écran), de trois types :
 
 - **Bordereaux de saisie** : saisie des écritures au clavier (Tab), équilibre débit/crédit automatique, plan comptable avec création rapide de comptes, calculs dans les montants, colonne Note, exports Excel, PDF et copier-coller vers un tableur.
-- **Exports Excel** : mise en page identique au PDF, formules conservées, feuille « PCG » avec tout le plan comptable. Dans le fichier, l'intitulé du compte est une formule : corriger un numéro de compte met l'intitulé à jour.
+- **Feuilles libres** : un tableur avec formules (SOMME, MOYENNE, SI, ARRONDI, VPM…, noms français ou anglais), recopie, copier-coller, mise en forme, insertion de lignes et de colonnes, annulation.
+- **Exports Excel** : une feuille ou tout un dossier dans un seul classeur ; mise en page identique au PDF, formules conservées, feuille « PCG » avec tout le plan comptable. Dans le fichier, l'intitulé du compte est une formule : corriger un numéro de compte met l'intitulé à jour.
 - **Tableaux d'amortissement** : plan économique linéaire, plan fiscal dégressif ou linéaire, amortissement dérogatoire, étalement d'une subvention d'investissement, commentaires par cellule et export Excel avec formules et commentaires.
 
 Adresse du site : https://user034988.github.io/compta-cours/

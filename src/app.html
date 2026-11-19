@@ -9,6 +9,7 @@
 :root{
   --bg:#F3F4F6; --surface:#FFFFFF; --band:#F4F6F9; --ink:#1B2230; --muted:#5C6676;
   --rule:#E1E5EB; --rule-strong:#C5CCD6; --accent:#2D4A73; --accent-ink:#FFFFFF; --accent-soft:#E5EBF4;
+  --sel:rgba(45,74,115,.11); --hl-yellow:#FFF4C2; --hl-blue:#DDE8F7; --hl-green:#DDF0E1; --hl-red:#F9DEDC; --hl-gray:#ECEEF2;
   --warn:#9A5800; --warn-soft:#FBEED8; --err:#B3261E; --err-soft:#F9E0DE; --focus:#3A5E93;
   --scrim:rgba(15,23,42,.38); --shadow:0 10px 30px rgba(15,23,42,.14),0 2px 6px rgba(15,23,42,.07);
   --f-ui:"Source Sans 3","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
@@ -18,11 +19,13 @@
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#101318; --surface:#161A21; --band:#1B2029; --ink:#E3E6EB; --muted:#98A1AE;
   --rule:#262C36; --rule-strong:#3A4250; --accent:#93AED8; --accent-ink:#0E1522; --accent-soft:#1F2B3E;
+  --sel:rgba(147,174,216,.18); --hl-yellow:#4A4216; --hl-blue:#1E2C44; --hl-green:#1C3626; --hl-red:#3E1B18; --hl-gray:#2A303A;
   --warn:#E6A94F; --warn-soft:#3A2B14; --err:#F2857C; --err-soft:#3E1B18; --focus:#93AED8;
   --scrim:rgba(0,0,0,.55); --shadow:0 10px 30px rgba(0,0,0,.5),0 2px 6px rgba(0,0,0,.3); color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#101318; --surface:#161A21; --band:#1B2029; --ink:#E3E6EB; --muted:#98A1AE;
   --rule:#262C36; --rule-strong:#3A4250; --accent:#93AED8; --accent-ink:#0E1522; --accent-soft:#1F2B3E;
+  --sel:rgba(147,174,216,.18); --hl-yellow:#4A4216; --hl-blue:#1E2C44; --hl-green:#1C3626; --hl-red:#3E1B18; --hl-gray:#2A303A;
   --warn:#E6A94F; --warn-soft:#3A2B14; --err:#F2857C; --err-soft:#3E1B18; --focus:#93AED8;
   --scrim:rgba(0,0,0,.55); --shadow:0 10px 30px rgba(0,0,0,.5),0 2px 6px rgba(0,0,0,.3); color-scheme:dark}
 
@@ -130,7 +133,6 @@ input.cell:focus{background:var(--surface);box-shadow:inset 0 0 0 2px var(--focu
 input.cell.mono{font-size:14.5px}
 input.cell.up{text-transform:uppercase}
 input.cell.amt{text-align:right}
-input.cell.auto{color:var(--accent);font-style:italic}
 input.cell.derived{color:var(--muted)}
 input.cell.note{font-size:13.5px}
 input.cell.note.derived{font-family:var(--f-num);font-size:12px}
@@ -293,27 +295,100 @@ table.amo td.has-c::after{content:"";position:absolute;top:0;right:0;border-styl
 .cref{border:0;background:transparent;padding:0;text-align:left;color:var(--accent);font-weight:500;cursor:pointer;font-size:12.5px;text-decoration:underline;text-underline-offset:3px}
 @media (max-width: 860px){ .amo-form{grid-template-columns:minmax(0,1fr)} }
 
+
+/* ---------- Dossiers de travail et onglets ---------- */
+.workspace{position:relative;display:flex;flex-direction:column;gap:8px;min-width:0;min-height:0}
+.workspace>.main{flex:1;min-height:0}
+.tabbar{display:flex;align-items:center;gap:8px;min-width:0;border-top:1px solid var(--rule-strong);padding-top:8px}
+.dname{display:flex;align-items:center;gap:4px;flex:0 1 210px;min-width:120px;color:var(--muted)}
+.dname svg{width:16px;height:16px;flex:none}
+#dName{flex:1;min-width:0;border:1px solid transparent;background:transparent;border-radius:6px;padding:5px 7px;font-weight:600;color:var(--ink)}
+#dName:hover{border-color:var(--rule)}
+#dName:focus{border-color:var(--focus);outline:none;background:var(--surface)}
+.tabs-list{display:flex;gap:4px;overflow-x:auto;flex:1;min-width:0;padding:2px 0;scrollbar-width:thin}
+.stab{display:inline-flex;align-items:center;gap:6px;flex:none;max-width:230px;padding:5px 5px 5px 10px;border:1px solid var(--rule-strong);border-radius:7px;background:var(--bg);color:var(--muted);cursor:pointer;font-size:13.5px;font-weight:500;user-select:none}
+.stab:hover{color:var(--ink)}
+.stab svg{width:14px;height:14px;flex:none}
+.stab .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stab.on{background:var(--surface);color:var(--ink);border-color:var(--accent);box-shadow:inset 0 -2px 0 var(--accent)}
+.stab .sx{border:0;background:transparent;color:var(--muted);width:20px;height:20px;border-radius:4px;cursor:pointer;opacity:0;line-height:1;font-size:15px;padding:0}
+.stab:hover .sx,.stab.on .sx,.stab:focus-within .sx{opacity:1}
+.stab .sx:hover{color:var(--err);background:var(--err-soft)}
+.stab-in{width:150px;border:1px solid var(--focus);border-radius:4px;padding:1px 5px;font:inherit;background:var(--surface);color:var(--ink)}
+.menu.up{top:auto;bottom:calc(100% + 4px)}
+.menu .mi{display:flex;gap:8px;align-items:center}
+.menu .mi svg{width:16px;height:16px;flex:none}
+.ws-loading{position:absolute;inset:0;z-index:20;background:var(--bg);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:14px}
+.empty-ws{margin:auto;max-width:560px;text-align:center;display:flex;flex-direction:column;gap:12px;padding:40px 16px}
+.empty-ws h2{margin:0;font-size:20px;text-wrap:balance}
+.empty-ws p{margin:0;color:var(--muted)}
+.empty-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.ditem{position:relative}
+.ditem .bitem{padding-right:32px}
+.ddel{position:absolute;top:7px;right:6px;border:0;background:transparent;color:var(--muted);width:24px;height:24px;border-radius:4px;cursor:pointer;opacity:0;font-size:15px}
+.ditem:hover .ddel,.ditem:focus-within .ddel{opacity:1}
+.ddel:hover{color:var(--err);background:var(--err-soft)}
+.ndtypes{border:0;padding:0;margin:0;display:grid;gap:6px}
+.ndtypes legend{font-size:12px;color:var(--muted);font-weight:500;margin-bottom:6px;padding:0}
+.ndt{display:flex;gap:10px;align-items:center;border:1px solid var(--rule-strong);border-radius:8px;padding:9px 12px;cursor:pointer}
+.ndt svg{width:16px;height:16px}
+.ndt:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+/* ---------- Feuille libre (tableur) ---------- */
+.ftool{display:flex;align-items:center;gap:3px;flex-wrap:wrap}
+.tb{border:1px solid transparent;background:transparent;border-radius:5px;min-width:30px;height:30px;padding:0 7px;cursor:pointer;color:var(--ink);font-size:14px;display:inline-flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap}
+.tb:hover{background:var(--surface);border-color:var(--rule-strong)}
+.tb[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.tb svg{width:16px;height:16px}
+.sw-b{min-width:26px;padding:0 4px}
+.sep{width:1px;height:20px;background:var(--rule-strong);margin:0 4px}
+#fFmt{height:30px;border:1px solid var(--rule-strong);border-radius:5px;background:var(--surface);color:var(--ink);padding:0 6px}
+.sw{width:16px;height:16px;border-radius:3px;border:1px solid var(--rule-strong);display:block}
+.sw-none{background:linear-gradient(135deg,transparent 45%,var(--err) 46%,var(--err) 54%,transparent 55%),var(--surface)}
+.sw-yellow{background:var(--hl-yellow)}.sw-blue{background:var(--hl-blue)}.sw-green{background:var(--hl-green)}.sw-red{background:var(--hl-red)}.sw-gray{background:var(--hl-gray)}
+.fbar{display:flex;align-items:center;gap:8px;border:1px solid var(--rule-strong);border-radius:6px;background:var(--surface);padding:0 10px;min-width:0}
+.fref{min-width:70px;font-weight:600;color:var(--muted);border-right:1px solid var(--rule);padding:7px 8px 7px 0;font-variant-numeric:tabular-nums}
+.fx{font-style:italic;color:var(--muted);font-family:Georgia,"Times New Roman",serif}
+.finput{flex:1;min-width:0;border:0;background:transparent;padding:7px 4px;font-size:14.5px;color:var(--ink);outline:none}
+.fstats{font-size:12.5px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.fwrap{flex:1;min-height:0;overflow:auto;position:relative;background:var(--surface);border:1px solid var(--rule-strong);border-radius:8px}
+table.fgrid{border-collapse:separate;border-spacing:0;table-layout:fixed;font-size:14.5px;font-variant-numeric:tabular-nums;user-select:none}
+.fgrid th{position:sticky;background:var(--bg);color:var(--muted);font-weight:500;font-size:12px;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);height:28px;padding:0}
+.fgrid thead th{top:0;z-index:3;text-align:center}
+.fgrid tbody th{left:0;z-index:2;text-align:center;cursor:e-resize}
+.fgrid thead th[data-c]{cursor:s-resize}
+.fgrid thead th.fc{left:0;z-index:4;cursor:pointer}
+.fgrid th.hsel{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.fgrid td{height:28px;padding:0 6px;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);white-space:nowrap;overflow:hidden;cursor:cell;color:var(--ink)}
+.fgrid td.a-right{text-align:right}.fgrid td.a-center{text-align:center}.fgrid td.a-left{text-align:left}
+.fgrid td.b{font-weight:700}.fgrid td.i{font-style:italic}.fgrid td.err{color:var(--err)}
+.fgrid td.insel{background-image:linear-gradient(var(--sel),var(--sel))}
+.fgrid td.act{box-shadow:inset 0 0 0 2px var(--accent)}
+.fgrid td.fillprev{box-shadow:inset 0 0 0 1px var(--accent);background-image:linear-gradient(var(--sel),var(--sel))}
+.fgrid thead th .rs{position:absolute;top:0;right:0;width:7px;height:100%;cursor:col-resize;z-index:4;touch-action:none}
+.fgrid thead th .rs:hover{background:var(--accent);opacity:.5}
+.fedit{position:absolute;z-index:6;border:2px solid var(--accent);padding:0 4px;font:inherit;font-size:14.5px;background:var(--surface);color:var(--ink);outline:none;box-shadow:var(--shadow);box-sizing:border-box}
+.ffill{position:absolute;z-index:5;width:8px;height:8px;background:var(--accent);border:1px solid var(--surface);cursor:crosshair}
+.fkey{position:absolute;top:0;left:0;width:1px;height:1px;opacity:0;border:0;padding:0;resize:none;pointer-events:none;overflow:hidden}
+@media (max-width: 860px){ .tabbar{flex-wrap:wrap} .tabs-list{order:3;flex-basis:100%} .dname{flex:1 1 auto} }
+
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
 </style>
 
 <div class="app" id="app">
-  <aside class="side" id="side" aria-label="Bordereaux">
+  <aside class="side" id="side" aria-label="Dossiers de travail">
     <div class="brand">
       <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect x="1" y="1" width="28" height="28" rx="6" fill="var(--accent)"/><path d="M8 10h14M8 15h14M8 20h14" stroke="var(--accent-ink)" stroke-width="1.6" stroke-linecap="round"/><path d="M15 7v16" stroke="var(--accent-ink)" stroke-width="1.6" stroke-linecap="round" opacity=".55"/></svg>
-      <div><strong>Comptabilité</strong><span>Saisie et amortissements</span></div>
+      <div><strong>Comptabilité</strong><span>Dossiers de travail</span></div>
       <button class="btn icon ghost theme-btn" id="btnTheme" type="button" aria-label="Thème : automatique" title="Thème : automatique (cliquer pour passer en mode clair)"></button>
       <button class="btn icon ghost side-toggle" id="btnCollapse" type="button" aria-label="Réduire le panneau" aria-expanded="true" title="Réduire le panneau (Ctrl+B)">«</button>
     </div>
-    <div class="seg" id="viewSeg" role="tablist" aria-label="Type de document">
-      <button type="button" role="tab" data-view="bdx" aria-selected="true" title="Bordereaux"><svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4h11M2.5 8h11M2.5 12h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg><span class="lbl">Bordereaux</span></button>
-      <button type="button" role="tab" data-view="amo" aria-selected="false" title="Amortissements"><svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 13.5h11M4 11V4.5M8 11V7M12 11V9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg><span class="lbl">Amortissements</span></button>
-    </div>
-    <button class="btn primary block" id="btnNew" type="button" aria-label="Nouveau bordereau" title="Nouveau bordereau"><span aria-hidden="true">+</span><span class="lbl"> Nouveau bordereau</span></button>
-    <div class="side-label" id="sideLabel">Vos bordereaux</div>
-    <ul class="blist" id="blist"><li class="side-empty">Chargement des bordereaux…</li></ul>
+    <button class="btn primary block" id="btnNew" type="button" aria-label="Nouveau dossier" title="Nouveau dossier de travail"><span aria-hidden="true">+</span><span class="lbl"> Nouveau dossier</span></button>
+    <div class="side-label" id="sideLabel">Vos dossiers</div>
+    <ul class="blist" id="blist"><li class="side-empty">Chargement de vos dossiers…</li></ul>
     <div class="side-foot"><div id="storeNote">Connexion à l'espace de sauvegarde…</div><div class="side-account" id="sideAccount" hidden><span id="sideEmail"></span><button type="button" class="linkbtn" id="btnLogout">Se déconnecter</button></div></div>
   </aside>
 
+  <div class="workspace" id="workspace">
   <main class="main" id="bdxMain">
     <header class="top">
       <div class="row1">
@@ -462,6 +537,77 @@ table.amo td.has-c::after{content:"";position:absolute;top:0;right:0;border-styl
       </div>
     </div>
   </main>
+  <main class="main" id="freeMain" hidden>
+    <header class="top">
+      <div class="row1">
+        <button class="btn icon only-narrow" id="fSide" type="button" aria-label="Afficher les dossiers">☰</button>
+        <input id="fName" class="b-name" aria-label="Nom de la feuille" autocomplete="off">
+        <span class="save" id="fSave" aria-live="polite"></span>
+        <div class="actions">
+          <button class="btn primary" id="fExport" type="button">Exporter en Excel</button>
+          <div class="menu-wrap">
+            <button class="btn icon" id="fMore" type="button" aria-label="Autres actions" aria-haspopup="true" aria-expanded="false">⋯</button>
+            <div class="menu" id="fMoreMenu" hidden>
+              <button type="button" data-fmore="dup">Dupliquer la feuille</button>
+              <button type="button" data-fmore="help">Mode d'emploi</button>
+              <hr>
+              <button type="button" data-bk="save">Sauvegarder tous mes documents <small>.json</small></button>
+              <button type="button" data-bk="restore">Restaurer une sauvegarde…</button>
+              <hr>
+              <button type="button" data-fmore="del" style="color:var(--err)">Supprimer la feuille</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ftool" role="toolbar" aria-label="Mise en forme">
+        <button type="button" class="tb" data-fx="undo" title="Annuler (Ctrl+Z)" aria-label="Annuler">↶</button>
+        <button type="button" class="tb" data-fx="redo" title="Rétablir (Ctrl+Y)" aria-label="Rétablir">↷</button>
+        <span class="sep"></span>
+        <button type="button" class="tb" id="fB" data-fx="b" aria-pressed="false" title="Gras (Ctrl+B)"><b>G</b></button>
+        <button type="button" class="tb" id="fI" data-fx="i" aria-pressed="false" title="Italique (Ctrl+I)"><i>I</i></button>
+        <span class="sep"></span>
+        <button type="button" class="tb" data-fx="al-left" data-al="left" aria-pressed="false" title="Aligner à gauche"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3h12M2 6.5h8M2 10h12M2 13.5h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><button type="button" class="tb" data-fx="al-center" data-al="center" aria-pressed="false" title="Centrer"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3h12M4 6.5h8M2 10h12M4 13.5h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><button type="button" class="tb" data-fx="al-right" data-al="right" aria-pressed="false" title="Aligner à droite"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3h12M6 6.5h8M2 10h12M6 13.5h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+        <span class="sep"></span>
+        <select id="fFmt" aria-label="Format des nombres"><option value="">Standard</option><option value="num">Nombre (2 décimales)</option><option value="int">Entier</option><option value="eur">Monétaire (€)</option><option value="pct">Pourcentage</option></select>
+        <span class="sep"></span>
+        <button type="button" class="tb sw-b" data-fx="bg-none" title="Fond : Sans couleur"><span class="sw sw-none"></span></button><button type="button" class="tb sw-b" data-fx="bg-yellow" title="Fond : Jaune"><span class="sw sw-yellow"></span></button><button type="button" class="tb sw-b" data-fx="bg-blue" title="Fond : Bleu"><span class="sw sw-blue"></span></button><button type="button" class="tb sw-b" data-fx="bg-green" title="Fond : Vert"><span class="sw sw-green"></span></button><button type="button" class="tb sw-b" data-fx="bg-red" title="Fond : Rouge"><span class="sw sw-red"></span></button><button type="button" class="tb sw-b" data-fx="bg-gray" title="Fond : Gris"><span class="sw sw-gray"></span></button>
+        <span class="sep"></span>
+        <button type="button" class="tb wide" data-fx="sum" title="Somme automatique des nombres au-dessus">Σ Somme</button>
+        <div class="menu-wrap">
+          <button type="button" class="tb wide" id="fStruct" aria-haspopup="true" aria-expanded="false">Lignes et colonnes ▾</button>
+          <div class="menu" id="fStructMenu" hidden>
+            <button type="button" data-fx="row-ins">Insérer une ligne au-dessus</button>
+            <button type="button" data-fx="row-del">Supprimer les lignes sélectionnées</button>
+            <hr>
+            <button type="button" data-fx="col-ins">Insérer une colonne à gauche</button>
+            <button type="button" data-fx="col-del">Supprimer les colonnes sélectionnées</button>
+            <hr>
+            <button type="button" data-fx="rows50">Ajouter 50 lignes en bas</button>
+            <button type="button" data-fx="cols5">Ajouter 5 colonnes à droite</button>
+            <hr>
+            <button type="button" data-fx="clearfmt">Effacer la mise en forme</button>
+          </div>
+        </div>
+      </div>
+      <div class="fbar"><span class="fref" id="fRef">A1</span><span class="fx" aria-hidden="true">fx</span><input id="fInput" class="finput" autocomplete="off" spellcheck="false" aria-label="Contenu de la cellule" placeholder="Valeur ou formule, par exemple =SOMME(A1:A5)"><span class="fstats" id="fStats"></span></div>
+    </header>
+    <div class="fwrap" id="fWrap"><table class="fgrid" id="fGrid" aria-label="Feuille de calcul"></table><input id="fEdit" class="fedit" hidden autocomplete="off" spellcheck="false" aria-label="Modifier la cellule"><span class="ffill" id="fFill" hidden title="Glisser pour recopier"></span><textarea id="fKey" class="fkey" aria-label="Feuille de calcul : utilisez les flèches pour vous déplacer et tapez pour saisir"></textarea></div>
+  </main>
+  <main class="main" id="emptyMain" hidden>
+    <div class="empty-ws"><h2>Ce dossier ne contient pas encore de feuille</h2><p>Comme dans un classeur Excel, ajoutez autant de feuilles que vous voulez :</p><div class="empty-btns"><button type="button" class="btn" data-new="bdx"><svg viewBox="0 0 16 16" aria-hidden="true" style="width:16px;height:16px"><path d="M2.5 4h11M2.5 8h11M2.5 12h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>Bordereau de saisie</button><button type="button" class="btn" data-new="amo"><svg viewBox="0 0 16 16" aria-hidden="true" style="width:16px;height:16px"><path d="M2.5 13.5h11M4 11V4.5M8 11V7M12 11V9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>Tableau d'amortissement</button><button type="button" class="btn" data-new="free"><svg viewBox="0 0 16 16" aria-hidden="true" style="width:16px;height:16px"><path d="M2.5 2.5h11v11h-11zM2.5 6.5h11M2.5 10h11M6.5 2.5v11" stroke="currentColor" stroke-width="1.3" fill="none"/></svg>Feuille libre (tableur)</button></div></div>
+  </main>
+  <nav class="tabbar" aria-label="Feuilles du dossier">
+    <button class="btn icon only-narrow" id="tSide" type="button" aria-label="Afficher les dossiers">☰</button>
+    <label class="dname" title="Nom du dossier"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 4.2c0-.7.5-1.2 1.2-1.2h3.4l1.5 1.6h5.7c.7 0 1.2.5 1.2 1.2v6.5c0 .7-.5 1.2-1.2 1.2H2.7c-.7 0-1.2-.5-1.2-1.2z" stroke="currentColor" stroke-width="1.3" fill="none"/></svg><input id="dName" aria-label="Nom du dossier" autocomplete="off"></label>
+    <div class="tabs-list" id="tabsList" role="tablist" aria-label="Feuilles"></div>
+    <div class="menu-wrap">
+      <button class="btn" id="addSheet" type="button" aria-haspopup="true" aria-expanded="false">+ Feuille</button>
+      <div class="menu up" id="addSheetMenu" hidden><button type="button" data-new="bdx"><span class="mi"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4h11M2.5 8h11M2.5 12h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>Bordereau de saisie</span></button><button type="button" data-new="amo"><span class="mi"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 13.5h11M4 11V4.5M8 11V7M12 11V9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>Tableau d'amortissement</span></button><button type="button" data-new="free"><span class="mi"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 2.5h11v11h-11zM2.5 6.5h11M2.5 10h11M6.5 2.5v11" stroke="currentColor" stroke-width="1.3" fill="none"/></svg>Feuille libre (tableur)</span></button></div>
+    </div>
+    <button class="btn" id="exportDossier" type="button" title="Toutes les feuilles du dossier dans un seul fichier Excel">Exporter le dossier</button>
+  </nav>
+  <div class="ws-loading" id="wsLoading">Chargement de vos dossiers…</div>
+</div>
 </div>
 
 <div class="ac" id="ac" hidden role="listbox" aria-label="Suggestions"></div>
@@ -2087,7 +2233,7 @@ const store = {
     }
     S.mode = this.mode; renderStoreNote();
     await this.loadProfile();
-    this.watchList(); this.watchImmos();
+    this.watchList(); this.watchImmos(); this.watchGeneric('dossiers'); this.watchGeneric('feuilles');
   },
   async initCloud(cfg) {
     this.mode = 'cloud'; S.mode = 'cloud';
@@ -2106,7 +2252,7 @@ const store = {
     $('#sideEmail').textContent = user.email || ''; $('#sideAccount').hidden = false;
     renderStoreNote();
     await this.loadProfile();
-    this.watchList(); this.watchImmos();
+    this.watchList(); this.watchImmos(); this.watchGeneric('dossiers'); this.watchGeneric('feuilles');
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') this.refresh(); });
   },
   async cloudFetch(kind) {
@@ -2190,6 +2336,26 @@ const store = {
     if (this.mode === 'remote') await this.pref.collection('bordereaux').doc(id).delete();
     else { const o = lsRead(); if (o.bordereaux) delete o.bordereaux[id]; lsWrite(o); S.list.delete(id); renderList(); }
   },
+  watchGeneric(name) {
+    const done = (m, st) => wsReady(name, m, st);
+    if (this.mode === 'cloud') { this.cloudFetch(name === 'dossiers' ? 'dossier' : 'feuille').then(m => done(m, 'ready')).catch(() => done(new Map(), 'error')); return; }
+    if (this.mode === 'remote') { this.pref.collection(name).onSnapshot(snap => done(new Map(snap.docs.filter(d => d.exists).map(d => [d.id, d.data()])), 'ready'), () => done(new Map(), 'error')); return; }
+    const o = lsRead(); done(new Map(Object.entries(o[name] || {})), 'ready');
+  },
+  async saveGeneric(name, doc) {
+    if (this.mode === 'cloud') return this.cloudUpsert(name === 'dossiers' ? 'dossier' : 'feuille', doc);
+    if (this.mode === 'remote') {
+      const ref = this.pref.collection(name).doc(doc.id);
+      try { await ref.set(doc); } catch (e) { if (e && e.code === 'unavailable') { await new Promise(r => setTimeout(r, 700)); await ref.set(doc); } else throw e; }
+      return;
+    }
+    const o = lsRead(); o[name] = o[name] || {}; o[name][doc.id] = doc; if (!lsWrite(o)) throw { code: 'local' };
+  },
+  async deleteGeneric(name, id) {
+    if (this.mode === 'cloud') return this.cloudDelete(id);
+    if (this.mode === 'remote') return this.pref.collection(name).doc(id).delete();
+    const o = lsRead(); if (o[name]) delete o[name][id]; lsWrite(o);
+  },
   async saveProfile(p) {
     if (this.mode === 'cloud') return this.cloudUpsert('profile', p, 'profile');
     if (this.mode === 'remote') await this.pref.set(p);
@@ -2252,6 +2418,7 @@ function renderStoreNote() {
     : 'Documents enregistrés dans ce navigateur uniquement.';
 }
 function onListUpdate() {
+  wsMaybeInit();
   if (!S.initialDone) {
     S.initialDone = true;
     if (S.cur.example && S.list.size) { const first = sortedList()[0]; if (first) { openBordereau(first.id); return; } }
@@ -2268,7 +2435,8 @@ function onListUpdate() {
 const sortedList = () => [...S.list.values()].sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
 let listTimer = null;
 function renderListSoon() { clearTimeout(listTimer); listTimer = setTimeout(renderList, 400); }
-function renderList() {
+function renderList() { renderDossiers(); if (!$('#tabsList').contains(document.activeElement)) renderTabs(); }
+function renderListLegacy() {
   if (S.view === 'amo') return renderAmoList();
   const ul = $('#blist'); const items = sortedList().map(d => d.id === S.cur?.id ? serialize(S.cur) : d);
   if (S.cur && !S.cur.example && !S.list.has(S.cur.id)) items.unshift(serialize(S.cur));
@@ -2320,7 +2488,7 @@ $('#bPeriod').addEventListener('change', e => { S.cur.period = e.target.value; m
 function newBordereauDialog() {
   closeMenus();
   const p = thisMonth();
-  openModal(`<h3>Nouveau bordereau</h3>
+  openModal(`<h3>Nouvelle feuille : bordereau de saisie</h3>
     <form id="nbForm" style="display:flex;flex-direction:column;gap:10px" autocomplete="off">
       <label class="field">Nom<input id="nbName" value="Bordereau ${esc(monthLabel(p).toLowerCase())}" autofocus></label>
       <div class="frow" style="grid-template-columns:160px minmax(0,1fr)">
@@ -2333,21 +2501,18 @@ function newBordereauDialog() {
   $('#nbName').select();
   $('#nbForm').addEventListener('submit', async ev => {
     ev.preventDefault();
-    await flushSave();
     const period = $('#nbPeriod').value || p;
-    S.cur = { id: uid(), name: $('#nbName').value.trim() || 'Bordereau ' + monthLabel(period).toLowerCase(), company: $('#nbCompany').value.trim(), period,
-      lines: [newLine(uid(), { j: '' })], createdAt: Date.now(), updatedAt: Date.now() };
-    S.undo = null; closeModal(); renderAll(); markDirty(); saveNow();
-    $('#app').classList.remove('side-open');
-    focusCell(0, 'date');
+    const name = $('#nbName').value.trim() || 'Bordereau ' + monthLabel(period).toLowerCase(), company = $('#nbCompany').value.trim();
+    closeModal(); await flushAll();
+    await createBordereauSheet({ name, period, company });
   });
 }
-$('#btnNew').addEventListener('click', () => { if (S.view === 'amo') amoNew(); else newBordereauDialog(); });
+$('#btnNew').addEventListener('click', () => newDossierDialog());
 $('#exNew').addEventListener('click', newBordereauDialog);
 async function duplicateBordereau() {
   closeMenus(); await flushSave();
   const b = clone(S.cur); b.id = uid(); b.example = false; b.name = (S.cur.name || 'Bordereau') + ' (copie)'; b.createdAt = b.updatedAt = Date.now();
-  S.cur = { ...b, lines: b.lines.map(normLine) }; renderAll(); markDirty(); saveNow();
+  S.cur = { ...b, lines: b.lines.map(normLine) }; renderAll(); markDirty(); await saveNow(); await W.addSheet('bdx', S.cur.id);
   toast('Bordereau dupliqué');
 }
 async function deleteBordereau() {
@@ -2359,8 +2524,7 @@ async function deleteBordereau() {
   clearTimeout(S.t); S.dirty = false;
   try { if (S.saving) await S.saving; await store.deleteBordereau(b.id); } catch (e) { toast('Suppression impossible pour le moment.'); return; }
   S.list.delete(b.id);
-  const next = sortedList()[0];
-  if (next) openBordereau(next.id); else { S.cur = exampleBordereau(); renderAll(); }
+  await W.removeSheet(b.id);
   toast('Bordereau supprimé');
 }
 
@@ -2455,6 +2619,7 @@ document.addEventListener('keydown', e => {
   if (mod && (e.key === 's' || e.key === 'S')) {
     e.preventDefault();
     if (S.view === 'amo') amoFlush().then(() => { if (!AS.cur.example) setSave('saved', null, $('#aSave')); });
+    else if (S.view === 'free') freeFlush().then(() => setSave('saved', null, $('#fSave')));
     else flushSave().then(() => { if (!S.cur.example) setSave('saved'); });
     return;
   }
@@ -2814,6 +2979,7 @@ async function amoSaveNow() {
 }
 async function amoFlush() { if (AS.saving) await AS.saving; if (AS.dirty) await amoSaveNow(); }
 function amoOnListUpdate() {
+  wsMaybeInit();
   if (!AS.initialDone) {
     AS.initialDone = true;
     if (AS.cur.example && AS.list.size) { const first = amoSorted()[0]; if (first) { amoOpen(first.id); return; } }
@@ -2851,13 +3017,13 @@ async function amoOpen(id) {
 async function amoNew() {
   closeMenus(); await amoFlush();
   AS.cur = amoNormalize({ id: uid(), name: 'Nouvelle immobilisation', createdAt: Date.now(), updatedAt: Date.now(), p: amoDefaults(), comments: {} });
-  AS.sel = null; amoRenderAll(); amoMarkDirty(); amoSaveNow();
+  AS.sel = null; amoRenderAll(); amoMarkDirty(); await amoSaveNow(); await W.addSheet('amo', AS.cur.id);
   $('#app').classList.remove('side-open'); $('#a_compte').focus();
 }
 async function amoDuplicate() {
   closeMenus(); await amoFlush();
   const d = amoSerialize(AS.cur); d.id = uid(); d.name = (AS.cur.name || 'Tableau') + ' (copie)'; d.createdAt = d.updatedAt = Date.now();
-  AS.cur = amoNormalize(d); amoRenderAll(); amoMarkDirty(); amoSaveNow(); toast('Tableau dupliqué');
+  AS.cur = amoNormalize(d); amoRenderAll(); amoMarkDirty(); await amoSaveNow(); await W.addSheet('amo', AS.cur.id); toast('Tableau dupliqué');
 }
 async function amoDelete() {
   closeMenus(); const d = AS.cur;
@@ -2867,8 +3033,7 @@ async function amoDelete() {
   clearTimeout(AS.t); AS.dirty = false;
   try { if (AS.saving) await AS.saving; await store.deleteImmo(d.id); } catch (e) { toast('Suppression impossible pour le moment.'); return; }
   AS.list.delete(d.id);
-  const next = amoSorted()[0];
-  if (next) amoOpen(next.id); else { AS.cur = amoExample(); amoRenderAll(); }
+  await W.removeSheet(d.id);
   toast('Tableau supprimé');
 }
 
@@ -3080,19 +3245,12 @@ function amoRenderAll() {
   amoFill(); amoRender();
   if (S.view === 'amo') renderList();
 }
-const VIEW_KEY = 'bordereaux-saisie:view';
-function setView(v, remember) {
+function setView(v) {
   S.view = v;
-  $('#bdxMain').hidden = v !== 'bdx'; $('#amoMain').hidden = v !== 'amo';
-  document.querySelectorAll('#viewSeg [data-view]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.view === v)));
-  $('#btnNew .lbl').textContent = v === 'amo' ? ' Nouveau tableau' : ' Nouveau bordereau';
-  $('#btnNew').setAttribute('aria-label', v === 'amo' ? 'Nouveau tableau d’amortissement' : 'Nouveau bordereau'); $('#btnNew').title = $('#btnNew').getAttribute('aria-label');
-  $('#sideLabel').textContent = v === 'amo' ? 'Vos tableaux d’amortissement' : 'Vos bordereaux';
+  ['bdx', 'amo', 'free', 'empty'].forEach(k => { $('#' + k + 'Main').hidden = k !== v; });
   closeAC(); hideCalc(); closeComment(false, true); closeMenus();
-  if (remember) { try { localStorage.setItem(VIEW_KEY, v); } catch (e) {} }
-  renderList();
 }
-$('#viewSeg').addEventListener('click', e => { const b = e.target.closest('[data-view]'); if (b && b.dataset.view !== S.view) setView(b.dataset.view, true); });
+$('#tSide').addEventListener('click', () => $('#app').classList.toggle('side-open'));
 $('#aSide').addEventListener('click', () => $('#app').classList.toggle('side-open'));
 $('#aExNew').addEventListener('click', amoNew);
 $('#aExport').addEventListener('click', () => amoExportXlsx());
@@ -3215,12 +3373,31 @@ function xAccountValidation(ws, range, pcgLast) {
 async function xBlob(wb) { return new Blob([await wb.xlsx.writeBuffer()], { type: XL_MIME }); }
 
 /* ---------- Bordereau ---------- */
-async function buildXlsx(b) {
-  const ExcelJS = await loadExcel();
+async function xWorkbook(items) {
+  const ExcelJS = await loadExcel(); const wb = new ExcelJS.Workbook(); wb.creator = 'Comptabilité'; wb.created = new Date();
+  if (items.length === 1) wb.title = items[0].doc.name || '';
+  const lines = items.filter(x => x.type === 'bdx').flatMap(x => x.doc.lines || []);
+  const ctx = { pcgLast: 2 + xAccounts().length, tiers: xTiersList(lines, items.some(x => x.doc.example)), names: new Set(['PCG', 'TIERS']) };
+  let n = 0;
+  for (const it of items) {
+    if (it.type === 'bdx') { xBdxSheet(wb, it.doc, ctx); n++; }
+    else if (it.type === 'amo') { const d = amoNormalize(clone(it.doc)); const R = it.R || amoCompute(d.p); if (R.ok) { xAmoSheet(wb, d, R, ctx); n++; } }
+    else { xFreeSheet(wb, it.doc, ctx); n++; }
+  }
+  if (!n) wb.addWorksheet('Vide');
+  xPcgSheet(wb); if (ctx.tiers.length) xTiersSheet(wb, ctx.tiers);
+  return xBlob(wb);
+}
+function xSheetName(ctx, name) {
+  const base = (String(name || 'Feuille').replace(/[\[\]:*?\/\\']/g, '-').trim() || 'Feuille').slice(0, 28);
+  let n = base, k = 2; while (ctx.names.has(n.toUpperCase())) n = `${base.slice(0, 26)} ${k++}`;
+  ctx.names.add(n.toUpperCase()); return n;
+}
+async function buildXlsx(b) { return xWorkbook([{ type: 'bdx', doc: b }]); }
+function xBdxSheet(wb, b, ctx) {
   const rows = exportRows(b); const s = summary(b.lines);
-  const tiers = xTiersList(b.lines, b.example); const tiersMap = new Map(tiers.map(t => [t.n, t.l]));
-  const wb = new ExcelJS.Workbook(); wb.creator = 'Comptabilité'; wb.title = b.name || 'Bordereau'; wb.created = new Date();
-  const ws = wb.addWorksheet('Bordereau', { views: [{ state: 'frozen', ySplit: 4, showGridLines: false }], properties: { tabColor: { argb: XL.navy } } });
+  const tiers = ctx.tiers; const tiersMap = new Map(tiers.map(t => [t.n, t.l]));
+  const ws = wb.addWorksheet(xSheetName(ctx, b.name || 'Bordereau'), { views: [{ state: 'frozen', ySplit: 4, showGridLines: false }], properties: { tabColor: { argb: XL.navy } } });
   const W = [7, 11.5, 9, 13, 14, 36, 44, 14, 14, 28];
   ws.columns = W.map(width => ({ width }));
   [4, 5].forEach(c => { ws.getColumn(c).numFmt = '@'; });
@@ -3228,7 +3405,7 @@ async function buildXlsx(b) {
   const head = ws.getRow(4); head.values = HEAD; head.height = 32;
   head.eachCell((c, col) => xStyle(c, { font: xFont({ bold: true, color: { argb: XL.white } }), fill: xFill(XL.navy), border: xBox(XL.navy),
     alignment: { vertical: 'middle', wrapText: true, horizontal: col <= 3 ? 'center' : (col === 8 || col === 9 ? 'right' : 'left'), indent: col >= 4 && col !== 8 && col !== 9 ? 1 : 0 } }));
-  const r0 = 5; const pcgLast = xPcgSheet(wb); if (tiers.length) xTiersSheet(wb, tiers);
+  const r0 = 5; const pcgLast = ctx.pcgLast;
   const srcLines = b.lines.filter(L => !isEmptyLine(L));
   const layout = []; let prevE = null;
   rows.forEach((x, k) => { const e = srcLines[k].e; if (prevE !== null && e !== prevE) layout.push(null); layout.push(k); prevE = e; });
@@ -3286,16 +3463,14 @@ async function buildXlsx(b) {
   ws.autoFilter = `A4:J${last}`;
   xAccountValidation(ws, `D${r0}:D${last}`, pcgLast);
   xPrint(ws, b.name || 'Bordereau', '4:4');
-  return xBlob(wb);
 }
 
 /* ---------- Tableau d'amortissement ---------- */
-async function amoBuildXlsx(d, R) {
-  const ExcelJS = await loadExcel(); const p = d.p, i = R.info;
-  const wb = new ExcelJS.Workbook(); wb.creator = 'Comptabilité'; wb.created = new Date();
+async function amoBuildXlsx(d, R) { return xWorkbook([{ type: 'amo', doc: d, R }]); }
+function xAmoSheet(wb, d, R, ctx) {
+  const p = d.p, i = R.info;
   const title = 'Immobilisation : ' + ([p.compte, p.designation].filter(Boolean).join(' - ') || d.name || '');
-  wb.title = title;
-  const ws = wb.addWorksheet('Amortissement', { views: [{ showGridLines: false }], properties: { tabColor: { argb: XL.navy } } });
+  const ws = wb.addWorksheet(xSheetName(ctx, d.name || 'Amortissement'), { views: [{ showGridLines: false }], properties: { tabColor: { argb: XL.navy } } });
   const cols = amoVisibleCols(R); const nC = cols.length;
   const sub = p.sub.on ? +p.sub.montant || 0 : 0;
   const yearTxt = /^\d{4}$/.test(String(p.ex0 || '').trim()) ? String(p.ex0).trim().slice(2) : (p.ex0 || 'N');
@@ -3412,8 +3587,6 @@ async function amoBuildXlsx(d, R) {
   R.notes.forEach(n => para('•  ' + n, xFont()));
   if (R.warn.length) { rn++; heading('Points à vérifier', XL.warn); R.warn.forEach(w => para('•  ' + w, xFont({ color: { argb: XL.warn } }))); }
   xPrint(ws, title, `${top}:${top + 1}`);
-  xPcgSheet(wb);
-  return xBlob(wb);
 }
 
 const xlLoadError = e => /Chargement|ExcelJS/.test(String(e && e.message));
@@ -3480,11 +3653,13 @@ const BACKUP_FORMAT = 'compta-cours';
 const plural = (n, one, many) => `${n} ${n > 1 ? many : one}`;
 async function exportBackup() {
   closeMenus();
-  try { await flushSave(); await amoFlush(); } catch (e) {}
+  await flushAll();
   const bdx = new Map(S.list); if (S.cur && !S.cur.example) bdx.set(S.cur.id, serialize(S.cur));
   const immos = new Map(AS.list); if (AS.cur && !AS.cur.example) immos.set(AS.cur.id, amoSerialize(AS.cur));
-  if (!bdx.size && !immos.size) { toast('Aucun document enregistré à sauvegarder.'); return; }
-  const data = { format: BACKUP_FORMAT, version: 1, exportedAt: new Date().toISOString(), profile: clone(S.profile), bordereaux: [...bdx.values()], immobilisations: [...immos.values()] };
+  const feuilles = new Map(FS.list); if (FS.cur) feuilles.set(FS.cur.id, freeSerialize(FS.cur));
+  const dossiers = new Map(W.list); if (W.cur) dossiers.set(W.cur.id, { ...(W.list.get(W.cur.id) || {}), id: W.cur.id, kind: 'dossier', name: W.cur.name, sheets: W.cur.sheets, active: W.cur.active, createdAt: W.cur.createdAt, updatedAt: W.cur.updatedAt });
+  if (!bdx.size && !immos.size && !feuilles.size) { toast('Aucun document enregistré à sauvegarder.'); return; }
+  const data = { format: BACKUP_FORMAT, version: 1, exportedAt: new Date().toISOString(), profile: clone(S.profile), bordereaux: [...bdx.values()], immobilisations: [...immos.values()], feuilles: [...feuilles.values()], dossiers: [...dossiers.values()] };
   await saveFile(`compta-cours-sauvegarde-${new Date().toISOString().slice(0, 10)}.json`, new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' }));
 }
 function pickBackup() { closeMenus(); const i = $('#backupFile'); i.value = ''; i.click(); }
@@ -3506,10 +3681,14 @@ $('#backupFile').addEventListener('change', async e => {
     rebuildAccounts(); await store.saveProfile(clone(S.profile));
     for (const d of data.bordereaux) { await store.saveBordereau(d); S.list.set(d.id, d); }
     for (const d0 of data.immobilisations) { const d = amoSerialize(amoNormalize(clone(d0))); await store.saveImmo(d); AS.list.set(d.id, d); }
+    for (const d0 of data.feuilles || []) { const d = freeSerialize(freeNormalize(clone(d0))); await store.saveGeneric('feuilles', d); FS.list.set(d.id, d); }
+    for (const d of data.dossiers || []) { await store.saveGeneric('dossiers', d); W.list.set(d.id, d); }
   } catch (err) { console.error(err); toast("La restauration s'est interrompue. Vérifiez votre connexion et réessayez."); return; }
-  const newest = arr => arr.slice().sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))[0];
-  if (nb && (S.cur.example || data.bordereaux.some(d => d.id === S.cur.id))) { S.dirty = false; await openBordereau((data.bordereaux.find(d => d.id === S.cur.id) || newest(data.bordereaux)).id); }
-  if (ni && (AS.cur.example || data.immobilisations.some(d => d.id === AS.cur.id))) { AS.dirty = false; await amoOpen((data.immobilisations.find(d => d.id === AS.cur.id) || newest(data.immobilisations)).id); }
+  const used = new Set(); W.list.forEach(d => (d.sheets || []).forEach(x => used.add(x.id)));
+  const orph = [...data.bordereaux.map(d => ({ id: d.id, type: 'bdx' })), ...data.immobilisations.map(d => ({ id: d.id, type: 'amo' })), ...(data.feuilles || []).map(d => ({ id: d.id, type: 'free' }))].filter(x => !used.has(x.id));
+  let target = (data.dossiers || [])[0];
+  if (orph.length) target = await wsCreate('Documents restaurés', orph, false);
+  if (target) { S.dirty = false; AS.dirty = false; FS.dirty = false; await wsOpen(target.id); }
   renderComputed(); renderList();
   toast(`Sauvegarde restaurée : ${plural(nb, 'bordereau', 'bordereaux')}, ${plural(ni, 'tableau', 'tableaux')}.`);
 });
@@ -3532,15 +3711,837 @@ function setTheme(t, remember) {
 $('#btnTheme').addEventListener('click', () => setTheme(THEME_NEXT[$('#btnTheme').dataset.t || 'auto'], true));
 { let t = null; try { t = localStorage.getItem(THEME_KEY); } catch (e) {} setTheme(t === 'light' || t === 'dark' ? t : 'auto', false); }
 
+/* ================= Feuille libre : tableur ================= */
+const FS = { cur: null, list: new Map(), state: 'loading', dirty: false, saving: null, again: false, t: null,
+  act: { r: 0, c: 0 }, anchor: { r: 0, c: 0 }, editing: false, editRaw: '', undo: [], redo: [], tds: [], vals: null, clip: null, point: null, drag: null };
+const F_DEFW = 96, F_ROWS = 100, F_COLS = 26;
+const colName = c => { let s = ''; c++; while (c > 0) { const m = (c - 1) % 26; s = String.fromCharCode(65 + m) + s; c = Math.floor((c - 1) / 26); } return s; };
+const colIndex = s => { let n = 0; for (const ch of s.toUpperCase()) n = n * 26 + (ch.charCodeAt(0) - 64); return n - 1; };
+const keyOf = (r, c) => colName(c) + (r + 1);
+function parseKey(k) { const m = /^([A-Z]+)(\d+)$/.exec(k); return m ? { r: +m[2] - 1, c: colIndex(m[1]) } : null; }
+
+/* ---------- Formules ---------- */
+const FN_ALIAS = { SOMME: 'SUM', MOYENNE: 'AVERAGE', NB: 'COUNT', NBVAL: 'COUNTA', ARRONDI: 'ROUND', 'ARRONDI.SUP': 'ROUNDUP', 'ARRONDI.INF': 'ROUNDDOWN',
+  ENT: 'INT', SI: 'IF', ET: 'AND', OU: 'OR', NON: 'NOT', PRODUIT: 'PRODUCT', PUISSANCE: 'POWER', RACINE: 'SQRT', 'SOMME.SI': 'SUMIF', 'NB.SI': 'COUNTIF',
+  VPM: 'PMT', CONCATENER: 'CONCATENATE', 'SIERREUR': 'IFERROR' };
+const FERR = e => ({ err: e });
+const isErr = v => v && typeof v === 'object' && 'err' in v;
+function fTokenize(src) {
+  const t = []; let i = 0;
+  while (i < src.length) {
+    const ch = src[i];
+    if (/\s/.test(ch)) { i++; continue; }
+    if (ch === '"') { let j = i + 1, s = ''; for (;;) { if (j >= src.length) throw '#VALUE!'; if (src[j] === '"') { if (src[j + 1] === '"') { s += '"'; j += 2; continue; } break; } s += src[j++]; } t.push({ k: 'str', v: s }); i = j + 1; continue; }
+    let m;
+    if ((m = /^(\d+(?:[.,]\d+)?|[.,]\d+)/.exec(src.slice(i))) && !/[A-Za-z_$]/.test(src[i - 1] || '')) { t.push({ k: 'num', v: parseFloat(m[1].replace(',', '.')) }); i += m[1].length; continue; }
+    if ((m = /^(\$?)([A-Za-z]{1,3})(\$?)(\d+)(?![A-Za-z0-9_.(])/.exec(src.slice(i)))) { t.push({ k: 'ref', r: +m[4] - 1, c: colIndex(m[2]), ar: !!m[3], ac: !!m[1] }); i += m[0].length; continue; }
+    if ((m = /^([A-Za-z_][A-Za-z0-9_.]*)\s*\(/.exec(src.slice(i)))) { t.push({ k: 'fn', v: m[1].toUpperCase() }); i += m[0].length; continue; }
+    if ((m = /^(VRAI|FAUX|TRUE|FALSE)(?![A-Za-z0-9_.(])/i.exec(src.slice(i)))) { t.push({ k: 'bool', v: /^(VRAI|TRUE)$/i.test(m[1]) }); i += m[0].length; continue; }
+    if ((m = /^(<=|>=|<>|[-+*/^&%=<>():;,])/.exec(src.slice(i)))) { t.push({ k: 'op', v: m[1] === ';' ? ',' : m[1] }); i += m[1].length; continue; }
+    throw '#NAME?';
+  }
+  return t;
+}
+function fParse(src) {
+  const t = fTokenize(src); let p = 0;
+  const peek = () => t[p], is = v => t[p] && t[p].k === 'op' && t[p].v === v;
+  const expect = v => { if (!is(v)) throw '#VALUE!'; p++; };
+  function cmp() { let l = cat(); while (t[p] && t[p].k === 'op' && ['=', '<>', '<', '>', '<=', '>='].includes(t[p].v)) { const op = t[p++].v; l = { t: 'bin', op, l, r: cat() }; } return l; }
+  function cat() { let l = add(); while (is('&')) { p++; l = { t: 'bin', op: '&', l, r: add() }; } return l; }
+  function add() { let l = mul(); while (is('+') || is('-')) { const op = t[p++].v; l = { t: 'bin', op, l, r: mul() }; } return l; }
+  function mul() { let l = pow(); while (is('*') || is('/')) { const op = t[p++].v; l = { t: 'bin', op, l, r: pow() }; } return l; }
+  function pow() { let l = un(); while (is('^')) { p++; l = { t: 'bin', op: '^', l, r: un() }; } return l; }
+  function un() { if (is('-')) { p++; return { t: 'neg', e: un() }; } if (is('+')) { p++; return un(); } return post(); }
+  function post() { let e = prim(); while (is('%')) { p++; e = { t: 'pct', e }; } return e; }
+  function prim() {
+    const k = peek(); if (!k) throw '#VALUE!';
+    if (k.k === 'num') { p++; return { t: 'num', v: k.v }; }
+    if (k.k === 'str') { p++; return { t: 'str', v: k.v }; }
+    if (k.k === 'bool') { p++; return { t: 'bool', v: k.v }; }
+    if (k.k === 'ref') { p++; if (is(':')) { p++; const b = t[p++]; if (!b || b.k !== 'ref') throw '#REF!'; return { t: 'range', a: k, b }; } return { t: 'ref', a: k }; }
+    if (k.k === 'fn') { p++; const name = FN_ALIAS[k.v] || k.v; const args = []; if (!is(')')) { args.push(cmp()); while (is(',')) { p++; args.push(cmp()); } } expect(')'); return { t: 'fn', name, args }; }
+    if (is('(')) { p++; const e = cmp(); expect(')'); return e; }
+    throw '#VALUE!';
+  }
+  const e = cmp(); if (p < t.length) throw '#VALUE!'; return e;
+}
+function parseCellNumber(raw) {
+  let s = String(raw).trim().replace(/[\s  ]/g, ''); if (!s) return null;
+  let pct = false; if (s.endsWith('%')) { pct = true; s = s.slice(0, -1); }
+  s = s.replace(/€$/, '');
+  if (s.includes(',') && s.includes('.')) s = s.replace(/\./g, '').replace(',', '.'); else s = s.replace(',', '.');
+  if (!/^[-+]?(\d+\.?\d*|\.\d+)(e[-+]?\d+)?$/i.test(s)) return null;
+  const n = parseFloat(s); return pct ? n / 100 : n;
+}
+function fEvalSheet(f) {
+  const cells = f.cells || {}, memo = new Map(), busy = new Set(), ast = new Map();
+  const num = v => { if (isErr(v)) throw v.err; if (v == null || v === '') return 0; if (typeof v === 'boolean') return v ? 1 : 0; if (typeof v === 'number') return v; const n = parseCellNumber(v); if (n == null) throw '#VALUE!'; return n; };
+  const str = v => { if (isErr(v)) throw v.err; if (v == null) return ''; if (typeof v === 'boolean') return v ? 'VRAI' : 'FAUX'; if (typeof v === 'number') return fmtGeneral(v); return String(v); };
+  const truthy = v => typeof v === 'string' ? (() => { throw '#VALUE!'; })() : !!num(v);
+  function cell(r, c) {
+    const k = keyOf(r, c); if (memo.has(k)) return memo.get(k);
+    const raw = cells[k] && cells[k].v; let v;
+    if (raw == null || raw === '') v = null;
+    else if (raw[0] === '=') {
+      if (busy.has(k)) return FERR('#CYCLE!');
+      busy.add(k);
+      try { let a = ast.get(k); if (!a) { a = fParse(raw.slice(1)); ast.set(k, a); } v = ev(a); if (Array.isArray(v)) v = v.length === 1 ? v[0] : FERR('#VALUE!'); if (typeof v === 'number' && !isFinite(v)) v = FERR('#NUM!'); }
+      catch (e) { v = FERR(typeof e === 'string' ? e : '#VALUE!'); }
+      busy.delete(k);
+    } else { const n = parseCellNumber(raw); v = n != null ? n : raw; }
+    memo.set(k, v); return v;
+  }
+  function flat(args) { const out = []; args.forEach(a => { const v = ev(a); if (Array.isArray(v)) v.forEach(x => out.push({ v: x, ref: true })); else out.push({ v, ref: a.t === 'ref' }); }); return out; }
+  function nums(args) { const out = []; flat(args).forEach(({ v, ref }) => { if (isErr(v)) throw v.err; if (typeof v === 'number') out.push(v); else if (!ref && v != null && v !== '') out.push(num(v)); }); return out; }
+  function crit(c) {
+    const s = typeof c === 'number' ? '=' + c : String(c); const m = /^(<=|>=|<>|<|>|=)?(.*)$/.exec(s); const op = m[1] || '=', rhs = m[2]; const rn = parseCellNumber(rhs);
+    return v => { const a = typeof v === 'number' ? v : parseCellNumber(v); if (rn != null && a != null) return { '=': a === rn, '<>': a !== rn, '<': a < rn, '>': a > rn, '<=': a <= rn, '>=': a >= rn }[op];
+      const sv = String(v ?? '').toLowerCase(), sr = rhs.toLowerCase(); return op === '=' ? sv === sr : op === '<>' ? sv !== sr : false; };
+  }
+  function ev(n) {
+    switch (n.t) {
+      case 'num': return n.v; case 'str': return n.v; case 'bool': return n.v;
+      case 'ref': return cell(n.a.r, n.a.c);
+      case 'range': { const r0 = Math.min(n.a.r, n.b.r), r1 = Math.max(n.a.r, n.b.r), c0 = Math.min(n.a.c, n.b.c), c1 = Math.max(n.a.c, n.b.c); const out = []; for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) out.push(cell(r, c)); return out; }
+      case 'neg': return -num(ev(n.e));
+      case 'pct': return num(ev(n.e)) / 100;
+      case 'bin': {
+        const a = ev(n.l), b = ev(n.r);
+        if (Array.isArray(a) || Array.isArray(b)) throw '#VALUE!';
+        switch (n.op) {
+          case '+': return num(a) + num(b); case '-': return num(a) - num(b); case '*': return num(a) * num(b);
+          case '/': { const d = num(b); if (d === 0) throw '#DIV/0!'; return num(a) / d; }
+          case '^': return Math.pow(num(a), num(b)); case '&': return str(a) + str(b);
+          default: { const both = (typeof a === 'number' || a == null) && (typeof b === 'number' || b == null); const x = both ? num(a) : str(a).toLowerCase(), y = both ? num(b) : str(b).toLowerCase();
+            return { '=': x === y, '<>': x !== y, '<': x < y, '>': x > y, '<=': x <= y, '>=': x >= y }[n.op]; }
+        }
+      }
+      case 'fn': {
+        const A = n.args, rnd = (x, d, mode) => { const f = Math.pow(10, d); const y = x * f; return (mode === 'up' ? Math.sign(y) * Math.ceil(Math.abs(y) - 1e-9) : mode === 'down' ? Math.trunc(y) : Math.round(y + Math.sign(y) * 1e-9)) / f; };
+        switch (n.name) {
+          case 'SUM': return nums(A).reduce((s, x) => s + x, 0);
+          case 'AVERAGE': { const v = nums(A); if (!v.length) throw '#DIV/0!'; return v.reduce((s, x) => s + x, 0) / v.length; }
+          case 'MIN': { const v = nums(A); return v.length ? Math.min(...v) : 0; }
+          case 'MAX': { const v = nums(A); return v.length ? Math.max(...v) : 0; }
+          case 'COUNT': return flat(A).filter(x => typeof x.v === 'number').length;
+          case 'COUNTA': return flat(A).filter(x => x.v != null && x.v !== '').length;
+          case 'PRODUCT': return nums(A).reduce((s, x) => s * x, 1);
+          case 'ROUND': return rnd(num(ev(A[0])), A[1] ? num(ev(A[1])) : 0);
+          case 'ROUNDUP': return rnd(num(ev(A[0])), A[1] ? num(ev(A[1])) : 0, 'up');
+          case 'ROUNDDOWN': return rnd(num(ev(A[0])), A[1] ? num(ev(A[1])) : 0, 'down');
+          case 'INT': return Math.floor(num(ev(A[0])));
+          case 'ABS': return Math.abs(num(ev(A[0])));
+          case 'SQRT': { const x = num(ev(A[0])); if (x < 0) throw '#NUM!'; return Math.sqrt(x); }
+          case 'POWER': return Math.pow(num(ev(A[0])), num(ev(A[1])));
+          case 'MOD': { const d = num(ev(A[1])); if (!d) throw '#DIV/0!'; const x = num(ev(A[0])); return x - d * Math.floor(x / d); }
+          case 'IF': return truthy(ev(A[0])) ? (A[1] ? ev(A[1]) : true) : (A[2] ? ev(A[2]) : false);
+          case 'IFERROR': { try { const v = ev(A[0]); if (isErr(v)) return ev(A[1]); return v; } catch (e) { return ev(A[1]); } }
+          case 'AND': return flat(A).every(x => truthy(x.v));
+          case 'OR': return flat(A).some(x => truthy(x.v));
+          case 'NOT': return !truthy(ev(A[0]));
+          case 'CONCATENATE': case 'CONCAT': return flat(A).map(x => str(x.v)).join('');
+          case 'SUMIF': { const rg = ev(A[0]), test = crit(ev(A[1])), sr = A[2] ? ev(A[2]) : rg; if (!Array.isArray(rg)) throw '#VALUE!'; return rg.reduce((s, v, k) => test(v) ? s + (typeof sr[k] === 'number' ? sr[k] : 0) : s, 0); }
+          case 'COUNTIF': { const rg = ev(A[0]), test = crit(ev(A[1])); if (!Array.isArray(rg)) throw '#VALUE!'; return rg.filter(test).length; }
+          case 'PMT': { const rate = num(ev(A[0])), np = num(ev(A[1])), pv = num(ev(A[2])), fv = A[3] ? num(ev(A[3])) : 0, ty = A[4] ? num(ev(A[4])) : 0;
+            if (!np) throw '#NUM!'; if (!rate) return -(pv + fv) / np; const q = Math.pow(1 + rate, np); return -(rate * (pv * q + fv)) / ((1 + rate * ty) * (q - 1)); }
+          default: throw '#NAME?';
+        }
+      }
+    }
+    throw '#VALUE!';
+  }
+  return { get: cell };
+}
+function fmtGeneral(v) {
+  if (Math.abs(v) >= 1e15 || (v !== 0 && Math.abs(v) < 1e-9)) return v.toExponential(4).replace('.', ',');
+  return String(Math.round(v * 1e10) / 1e10).replace('.', ',');
+}
+function fDisplay(v, st) {
+  if (v == null) return '';
+  if (isErr(v)) return v.err;
+  if (typeof v === 'boolean') return v ? 'VRAI' : 'FAUX';
+  if (typeof v !== 'number') return String(v);
+  const f = st && st.f;
+  const grp = (x, d) => { const neg = x < 0; const [i, dd] = Math.abs(x).toFixed(d).split('.'); return (neg ? '-' : '') + i.replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + (d ? ',' + dd : ''); };
+  if (f === 'num') return grp(v, 2);
+  if (f === 'int') return grp(v, 0);
+  if (f === 'eur') return grp(v, 2) + ' €';
+  if (f === 'pct') return grp(v * 100, 2) + ' %';
+  return fmtGeneral(v);
+}
+/* Décale les références relatives d'une formule (recopie, collage) */
+function fShiftRefs(raw, dr, dc) {
+  if (!raw || raw[0] !== '=') return raw;
+  return raw.replace(/("(?:[^"]|"")*")|(\$?)([A-Za-z]{1,3})(\$?)(\d+)(?![A-Za-z0-9_.(])/g, (m, s, a1, col, a2, row, off, all) => {
+    if (s) return s; const prev = all[off - 1] || ''; if (/[A-Za-z0-9_.]/.test(prev)) return m;
+    let c = colIndex(col), r = +row - 1; if (!a1) c += dc; if (!a2) r += dr;
+    if (c < 0 || r < 0) return '#REF!';
+    return a1 + colName(c) + a2 + (r + 1);
+  });
+}
+/* Insertion ou suppression de lignes et colonnes : met à jour toutes les références */
+function fMoveRefs(raw, axis, at, delta) {
+  if (!raw || raw[0] !== '=') return raw;
+  return raw.replace(/("(?:[^"]|"")*")|(\$?)([A-Za-z]{1,3})(\$?)(\d+)(?![A-Za-z0-9_.(])/g, (m, s, a1, col, a2, row, off, all) => {
+    if (s) return s; const prev = all[off - 1] || ''; if (/[A-Za-z0-9_.]/.test(prev)) return m;
+    let c = colIndex(col), r = +row - 1; let x = axis === 'r' ? r : c;
+    if (delta < 0 && x >= at && x < at - delta) return '#REF!';
+    if (x >= at) x += delta;
+    if (axis === 'r') r = x; else c = x;
+    return a1 + colName(c) + a2 + (r + 1);
+  });
+}
+/* Formule au format Excel : fonctions en anglais, virgule comme séparateur, point décimal */
+function fToExcel(raw) {
+  const body = raw.slice(1);
+  return body.replace(/("(?:[^"]|"")*")|([A-Za-z_][A-Za-z0-9_.]*)(\s*\()|(\d),(\d)|;|\b(VRAI|FAUX)\b/gi, (m, s, fn, par, d1, d2, bool) => {
+    if (s) return s; if (fn) return (FN_ALIAS[fn.toUpperCase()] || fn.toUpperCase()) + '(';
+    if (d1) return d1 + '.' + d2; if (bool) return /^vrai$/i.test(bool) ? 'TRUE' : 'FALSE'; return ',';
+  });
+}
+
+/* ---------- Documents ---------- */
+function freeNewDoc(name) { return { id: uid(), kind: 'free', name: name || 'Feuille libre', cells: {}, colW: {}, nRows: F_ROWS, nCols: F_COLS, createdAt: Date.now(), updatedAt: Date.now() }; }
+function freeNormalize(d) { d.cells = d.cells || {}; d.colW = d.colW || {}; d.nRows = d.nRows || F_ROWS; d.nCols = d.nCols || F_COLS; return d; }
+function freeSerialize(d) { return { id: d.id, kind: 'free', name: d.name || 'Sans titre', cells: clone(d.cells), colW: { ...d.colW }, nRows: d.nRows, nCols: d.nCols, createdAt: d.createdAt || Date.now(), updatedAt: d.updatedAt || Date.now() }; }
+function freeExample() {
+  const d = freeNewDoc('Calculs libres');
+  const put = (k, v, s) => { d.cells[k] = s ? { v, s } : { v }; };
+  put('A1', 'Emprunt bancaire', { b: 1 }); put('A3', 'Capital emprunté'); put('B3', '50000', { f: 'eur' });
+  put('A4', 'Taux annuel'); put('B4', '4%', { f: 'pct' }); put('A5', 'Durée (mois)'); put('B5', '60');
+  put('A6', 'Mensualité'); put('B6', '=-VPM(B4/12;B5;B3)', { f: 'eur', b: 1 });
+  put('A7', 'Coût total du crédit'); put('B7', '=B6*B5-B3', { f: 'eur' });
+  put('A9', 'Ventilation TVA', { b: 1 }); put('A10', 'Montant HT'); put('B10', '1200', { f: 'eur' });
+  put('A11', 'TVA 20 %'); put('B11', '=ARRONDI(B10*20%;2)', { f: 'eur' }); put('A12', 'Montant TTC'); put('B12', '=SOMME(B10:B11)', { f: 'eur', b: 1 });
+  d.colW = { 0: 180, 1: 120 };
+  return d;
+}
+function freeMarkDirty() {
+  FS.cur.updatedAt = Date.now(); FS.dirty = true; setSave('pending', null, $('#fSave'));
+  clearTimeout(FS.t); FS.t = setTimeout(freeSaveNow, 900); renderListSoon();
+}
+async function freeSaveNow() {
+  clearTimeout(FS.t); FS.t = null;
+  if (FS.saving) { FS.again = true; return FS.saving; }
+  if (!FS.dirty || !FS.cur) return;
+  const doc = freeSerialize(FS.cur); FS.dirty = false; setSave('saving', null, $('#fSave'));
+  if (JSON.stringify(doc).length > 250000) { FS.dirty = true; setSave('error', 'Feuille trop volumineuse : répartissez les données sur plusieurs feuilles.', $('#fSave')); return; }
+  FS.saving = (async () => {
+    try { await store.saveGeneric('feuilles', doc); FS.list.set(doc.id, doc); setSave(FS.dirty ? 'pending' : 'saved', null, $('#fSave')); }
+    catch (e) { if (FS.cur && FS.cur.id === doc.id) { FS.dirty = true; setSave('error', null, $('#fSave')); clearTimeout(FS.t); FS.t = setTimeout(freeSaveNow, 5000); } }
+  })();
+  await FS.saving; FS.saving = null;
+  if (FS.again) { FS.again = false; if (FS.dirty) return freeSaveNow(); }
+}
+async function freeFlush() { if (FS.editing) fCommit(0, 0); if (FS.saving) await FS.saving; if (FS.dirty) await freeSaveNow(); }
+async function freeOpen(id) {
+  await freeFlush();
+  const d = FS.list.get(id); if (!d) return;
+  FS.cur = freeNormalize(clone(d)); FS.undo = []; FS.redo = []; FS.act = { r: 0, c: 0 }; FS.anchor = { r: 0, c: 0 };
+  freeRenderAll(); $('#fSave').textContent = d.updatedAt ? `Enregistré ${rel(d.updatedAt)}` : '';
+}
+async function freeCreate(name) {
+  await freeFlush();
+  FS.cur = freeNewDoc(name); FS.undo = []; FS.redo = []; FS.act = { r: 0, c: 0 }; FS.anchor = { r: 0, c: 0 };
+  freeRenderAll(); freeMarkDirty(); await freeSaveNow();
+  return FS.cur.id;
+}
+async function freeDuplicate() {
+  closeMenus(); await freeFlush();
+  const d = freeSerialize(FS.cur); d.id = uid(); d.name = (FS.cur.name || 'Feuille') + ' (copie)'; d.createdAt = d.updatedAt = Date.now();
+  FS.cur = freeNormalize(d); freeRenderAll(); freeMarkDirty(); await freeSaveNow(); W.addSheet('free', FS.cur.id); toast('Feuille dupliquée');
+}
+async function freeDelete() {
+  closeMenus(); const d = FS.cur; if (!d) return;
+  const ok = await confirmBox(`Supprimer « ${esc(d.name)} » ?`, 'La feuille et son contenu seront définitivement effacés.', 'Supprimer', true);
+  if (!ok) return;
+  clearTimeout(FS.t); FS.dirty = false;
+  try { if (FS.saving) await FS.saving; await store.deleteGeneric('feuilles', d.id); } catch (e) { toast('Suppression impossible pour le moment.'); return; }
+  FS.list.delete(d.id); FS.cur = null; W.removeSheet(d.id); toast('Feuille supprimée');
+}
+
+/* ---------- Affichage ---------- */
+const fGrid = $('#fGrid'), fWrap = $('#fWrap'), fKey = $('#fKey'), fEdit = $('#fEdit'), fInput = $('#fInput');
+function fStyle(r, c) { const x = FS.cur.cells[keyOf(r, c)]; return (x && x.s) || {}; }
+function fRaw(r, c) { const x = FS.cur.cells[keyOf(r, c)]; return x ? x.v || '' : ''; }
+function fSel() { const a = FS.anchor, b = FS.act; return { r0: Math.min(a.r, b.r), r1: Math.max(a.r, b.r), c0: Math.min(a.c, b.c), c1: Math.max(a.c, b.c) }; }
+function freeRenderAll() {
+  const d = FS.cur;
+  if (document.activeElement?.id !== 'fName') $('#fName').value = d.name || '';
+  let h = '<colgroup><col style="width:46px">';
+  for (let c = 0; c < d.nCols; c++) h += `<col style="width:${d.colW[c] || F_DEFW}px">`;
+  h += '</colgroup><thead><tr><th class="fc" aria-label="Tout sélectionner"></th>';
+  for (let c = 0; c < d.nCols; c++) h += `<th data-c="${c}">${colName(c)}<span class="rs" data-rc="${c}" title="Glisser pour élargir · double-clic : largeur d'origine"></span></th>`;
+  h += '</tr></thead><tbody>';
+  for (let r = 0; r < d.nRows; r++) { h += `<tr><th data-r="${r}">${r + 1}</th>`; for (let c = 0; c < d.nCols; c++) h += `<td data-r="${r}" data-c="${c}"></td>`; h += '</tr>'; }
+  fGrid.innerHTML = h + '</tbody>';
+  const tot = 46 + Array.from({ length: d.nCols }, (_, c) => d.colW[c] || F_DEFW).reduce((a, b) => a + b, 0);
+  fGrid.style.width = tot + 'px';
+  FS.tds = []; fGrid.querySelectorAll('tbody tr').forEach((tr, r) => { FS.tds[r] = [...tr.querySelectorAll('td')]; });
+  freeRecalc();
+}
+function freeRecalc() {
+  const d = FS.cur; const E = fEvalSheet(d); FS.vals = E;
+  for (let r = 0; r < d.nRows; r++) for (let c = 0; c < d.nCols; c++) {
+    const td = FS.tds[r][c]; const x = d.cells[keyOf(r, c)];
+    if (!x) { if (td.textContent || td.className) { td.textContent = ''; td.className = ''; td.removeAttribute('style'); } continue; }
+    const v = E.get(r, c), st = x.s || {};
+    td.textContent = fDisplay(v, st);
+    const al = st.al || (typeof v === 'number' ? 'right' : isErr(v) || typeof v === 'boolean' ? 'center' : 'left');
+    td.className = ['a-' + al, st.b ? 'b' : '', st.i ? 'i' : '', isErr(v) ? 'err' : ''].filter(Boolean).join(' ');
+    td.style.background = st.bg ? `var(--hl-${st.bg})` : '';
+  }
+  fPaintSel();
+}
+function fPaintSel() {
+  const s = fSel(), d = FS.cur;
+  fGrid.querySelectorAll('.insel,.act').forEach(e => e.classList.remove('insel', 'act'));
+  fGrid.querySelectorAll('th.hsel').forEach(e => e.classList.remove('hsel'));
+  for (let r = s.r0; r <= s.r1; r++) for (let c = s.c0; c <= s.c1; c++) { const td = FS.tds[r] && FS.tds[r][c]; if (td) td.classList.add('insel'); }
+  const a = FS.tds[FS.act.r] && FS.tds[FS.act.r][FS.act.c]; if (a) a.classList.add('act');
+  for (let c = s.c0; c <= s.c1; c++) { const th = fGrid.querySelector(`thead th[data-c="${c}"]`); if (th) th.classList.add('hsel'); }
+  for (let r = s.r0; r <= s.r1; r++) { const th = fGrid.querySelector(`tbody th[data-r="${r}"]`); if (th) th.classList.add('hsel'); }
+  $('#fRef').textContent = s.r0 === s.r1 && s.c0 === s.c1 ? keyOf(FS.act.r, FS.act.c) : `${keyOf(s.r0, s.c0)}:${keyOf(s.r1, s.c1)}`;
+  if (!FS.editing) fInput.value = fRaw(FS.act.r, FS.act.c);
+  // statistiques de la sélection
+  let n = 0, sum = 0, cnt = 0;
+  if (FS.vals) for (let r = s.r0; r <= s.r1; r++) for (let c = s.c0; c <= s.c1; c++) { const v = FS.vals.get(r, c); if (v != null && v !== '') cnt++; if (typeof v === 'number') { n++; sum += v; } }
+  $('#fStats').textContent = n > 1 || (cnt > 1) ? `Somme : ${fmt(sum)}   ·   Moyenne : ${n ? fmt(sum / n) : '–'}   ·   Nb : ${cnt}` : '';
+  const st = fStyle(FS.act.r, FS.act.c);
+  $('#fB').setAttribute('aria-pressed', String(!!st.b)); $('#fI').setAttribute('aria-pressed', String(!!st.i));
+  document.querySelectorAll('#freeMain [data-al]').forEach(b => b.setAttribute('aria-pressed', String((st.al || '') === b.dataset.al)));
+  $('#fFmt').value = st.f || '';
+  // poignée de recopie
+  const last = FS.tds[s.r1] && FS.tds[s.r1][s.c1]; const fh = $('#fFill');
+  if (last && !FS.editing) { fh.hidden = false; fh.style.left = (last.offsetLeft + last.offsetWidth - 4) + 'px'; fh.style.top = (last.offsetTop + last.offsetHeight - 4) + 'px'; } else fh.hidden = true;
+}
+function fScrollTo(r, c) {
+  const td = FS.tds[r] && FS.tds[r][c]; if (!td) return;
+  const W0 = fWrap; const headH = 28, rowW = 46;
+  if (td.offsetTop - headH < W0.scrollTop) W0.scrollTop = td.offsetTop - headH;
+  else if (td.offsetTop + td.offsetHeight > W0.scrollTop + W0.clientHeight) W0.scrollTop = td.offsetTop + td.offsetHeight - W0.clientHeight;
+  if (td.offsetLeft - rowW < W0.scrollLeft) W0.scrollLeft = td.offsetLeft - rowW;
+  else if (td.offsetLeft + td.offsetWidth > W0.scrollLeft + W0.clientWidth) W0.scrollLeft = td.offsetLeft + td.offsetWidth - W0.clientWidth;
+}
+function fGo(r, c, extend) {
+  const d = FS.cur; r = Math.max(0, Math.min(d.nRows - 1, r)); c = Math.max(0, Math.min(d.nCols - 1, c));
+  FS.act = { r, c }; if (!extend) FS.anchor = { r, c };
+  fPaintSel(); fScrollTo(r, c);
+}
+function fFocus() { if (document.activeElement !== fKey) fKey.focus({ preventScroll: true }); fKey.value = ' '; fKey.select(); }
+
+/* ---------- Modifications (avec annulation) ---------- */
+function fSnapshot() { return JSON.stringify({ cells: FS.cur.cells, colW: FS.cur.colW, nRows: FS.cur.nRows, nCols: FS.cur.nCols }); }
+function fChange(fn, full) {
+  FS.undo.push(fSnapshot()); if (FS.undo.length > 80) FS.undo.shift(); FS.redo = [];
+  fn(); freeMarkDirty(); if (full) freeRenderAll(); else freeRecalc();
+}
+function fRestore(snap, full) { const o = JSON.parse(snap); Object.assign(FS.cur, o); freeMarkDirty(); freeRenderAll(); }
+function fUndo() { if (!FS.undo.length) return; FS.redo.push(fSnapshot()); fRestore(FS.undo.pop()); }
+function fRedo() { if (!FS.redo.length) return; FS.undo.push(fSnapshot()); fRestore(FS.redo.pop()); }
+function fSetRaw(r, c, raw) {
+  const k = keyOf(r, c), x = FS.cur.cells[k];
+  if (raw === '' || raw == null) { if (x) { if (x.s && Object.keys(x.s).length) delete x.v; else delete FS.cur.cells[k]; } return; }
+  if (x) x.v = raw; else FS.cur.cells[k] = { v: raw };
+  if (/%\s*$/.test(raw) && raw[0] !== '=' && parseCellNumber(raw) != null) { const y = FS.cur.cells[k]; y.s = y.s || {}; if (!y.s.f) y.s.f = 'pct'; }
+  if (/€\s*$/.test(raw) && raw[0] !== '=' && parseCellNumber(raw) != null) { const y = FS.cur.cells[k]; y.s = y.s || {}; if (!y.s.f) y.s.f = 'eur'; }
+}
+function fStyleSel(fn) {
+  const s = fSel();
+  fChange(() => { for (let r = s.r0; r <= s.r1; r++) for (let c = s.c0; c <= s.c1; c++) {
+    const k = keyOf(r, c); const x = FS.cur.cells[k] || (FS.cur.cells[k] = {}); x.s = x.s || {}; fn(x.s, r, c);
+    Object.keys(x.s).forEach(p => { if (!x.s[p]) delete x.s[p]; }); if (!Object.keys(x.s).length) delete x.s; if (!x.s && (x.v == null || x.v === '')) delete FS.cur.cells[k];
+  } });
+}
+function fClearSel() { const s = fSel(); fChange(() => { for (let r = s.r0; r <= s.r1; r++) for (let c = s.c0; c <= s.c1; c++) fSetRaw(r, c, ''); }); }
+
+/* ---------- Édition d'une cellule ---------- */
+function fStartEdit(initial, keepRaw) {
+  if (!FS.cur) return;
+  const { r, c } = FS.act; const td = FS.tds[r][c];
+  FS.editing = true; FS.point = null;
+  fEdit.value = keepRaw ? fRaw(r, c) : (initial || ''); fInput.value = fEdit.value;
+  fEdit.style.left = td.offsetLeft + 'px'; fEdit.style.top = td.offsetTop + 'px';
+  fEdit.style.minWidth = td.offsetWidth + 'px'; fEdit.style.height = td.offsetHeight + 'px';
+  fEdit.hidden = false; $('#fFill').hidden = true; fEdit.focus(); const L = fEdit.value.length; fEdit.setSelectionRange(L, L);
+}
+function fCommit(dr, dc) {
+  if (!FS.editing) return;
+  const raw = fEdit.value; const { r, c } = FS.act;
+  FS.editing = false; fEdit.hidden = true; FS.point = null;
+  if (raw !== fRaw(r, c)) fChange(() => fSetRaw(r, c, raw.trim() === '' ? '' : raw));
+  fGo(r + dr, c + dc); fFocus();
+}
+function fCancel() { FS.editing = false; fEdit.hidden = true; FS.point = null; fPaintSel(); fFocus(); }
+fEdit.addEventListener('input', () => { fInput.value = fEdit.value; FS.point = null; });
+fInput.addEventListener('focus', () => { if (!FS.editing) { FS.editing = true; fEdit.value = fRaw(FS.act.r, FS.act.c); fInput.value = fEdit.value; } });
+fInput.addEventListener('input', () => { fEdit.value = fInput.value; FS.point = null; });
+function fEditKeys(e) {
+  if (e.key === 'Enter') { e.preventDefault(); fCommit(e.shiftKey ? -1 : 1, 0); }
+  else if (e.key === 'Tab') { e.preventDefault(); fCommit(0, e.shiftKey ? -1 : 1); }
+  else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); fCancel(); }
+  else if (e.target === fEdit && !fEdit.value.startsWith('=') && ['ArrowUp', 'ArrowDown'].includes(e.key)) { e.preventDefault(); fCommit(e.key === 'ArrowDown' ? 1 : -1, 0); }
+}
+fEdit.addEventListener('keydown', fEditKeys); fInput.addEventListener('keydown', fEditKeys);
+fInput.addEventListener('blur', () => setTimeout(() => { if (FS.editing && document.activeElement !== fEdit && document.activeElement !== fInput && !FS.pointing) fCommit(0, 0); }, 0));
+fEdit.addEventListener('blur', () => setTimeout(() => { if (FS.editing && document.activeElement !== fEdit && document.activeElement !== fInput && !FS.pointing) fCommit(0, 0); }, 0));
+/* Mode « pointage » : pendant la saisie d'une formule, cliquer une cellule insère sa référence */
+function fCanPoint() { const el = document.activeElement === fInput ? fInput : fEdit; const v = el.value; if (!v.startsWith('=')) return null; const p = el.selectionStart; return /[=(+\-*/^&;,:<>]\s*$/.test(v.slice(0, p)) || FS.point ? el : null; }
+
+/* ---------- Souris ---------- */
+fGrid.addEventListener('mousedown', e => {
+  const td = e.target.closest('td[data-r]'), rh = e.target.closest('tbody th[data-r]'), ch = e.target.closest('thead th[data-c]');
+  if (e.target.closest('.rs')) return;
+  if (FS.editing) {
+    const el = td && fCanPoint();
+    if (el) {
+      e.preventDefault(); FS.pointing = true;
+      const r = +td.dataset.r, c = +td.dataset.c; const v = el.value; const pos = FS.point ? FS.point.start : el.selectionStart;
+      const end = FS.point ? FS.point.start + FS.point.len : el.selectionEnd; const ref = keyOf(r, c);
+      el.value = v.slice(0, pos) + ref + v.slice(end); FS.point = { start: pos, len: ref.length, r, c, el };
+      (el === fEdit ? fInput : fEdit).value = el.value; el.focus(); el.setSelectionRange(pos + ref.length, pos + ref.length);
+      return;
+    }
+    fCommit(0, 0);
+  }
+  if (td) { e.preventDefault(); const r = +td.dataset.r, c = +td.dataset.c; if (e.shiftKey) fGo(r, c, true); else fGo(r, c); FS.drag = 'sel'; fFocus(); }
+  else if (rh) { e.preventDefault(); const r = +rh.dataset.r; FS.anchor = { r, c: 0 }; FS.act = { r: e.shiftKey ? r : r, c: FS.cur.nCols - 1 }; if (e.shiftKey) FS.anchor.r = FS.anchor.r; fPaintSel(); FS.drag = 'row'; fFocus(); }
+  else if (ch) { e.preventDefault(); const c = +ch.dataset.c; FS.anchor = { r: 0, c }; FS.act = { r: FS.cur.nRows - 1, c }; fPaintSel(); FS.drag = 'col'; fFocus(); }
+  else if (e.target.closest('th.fc')) { FS.anchor = { r: 0, c: 0 }; FS.act = { r: FS.cur.nRows - 1, c: FS.cur.nCols - 1 }; fPaintSel(); fFocus(); }
+});
+fGrid.addEventListener('mouseover', e => {
+  if (FS.pointing && FS.point) {
+    const td = e.target.closest('td[data-r]'); if (!td) return; const P = FS.point; const r = +td.dataset.r, c = +td.dataset.c;
+    const ref = (r === P.r && c === P.c) ? keyOf(r, c) : `${keyOf(Math.min(r, P.r), Math.min(c, P.c))}:${keyOf(Math.max(r, P.r), Math.max(c, P.c))}`;
+    const el = P.el; el.value = el.value.slice(0, P.start) + ref + el.value.slice(P.start + P.len); P.len = ref.length;
+    (el === fEdit ? fInput : fEdit).value = el.value; el.setSelectionRange(P.start + P.len, P.start + P.len); return;
+  }
+  if (!FS.drag) return;
+  if (FS.drag === 'sel' || FS.drag === 'fill') { const td = e.target.closest('td[data-r]'); if (!td) return; const r = +td.dataset.r, c = +td.dataset.c;
+    if (FS.drag === 'sel') { FS.act = { r, c }; fPaintSel(); } else fFillPreview(r, c); }
+  else if (FS.drag === 'row') { const th = e.target.closest('[data-r]'); if (th) { FS.act = { r: +th.dataset.r, c: FS.cur.nCols - 1 }; fPaintSel(); } }
+  else if (FS.drag === 'col') { const th = e.target.closest('[data-c]'); if (th) { FS.act = { r: FS.cur.nRows - 1, c: +th.dataset.c }; fPaintSel(); } }
+});
+document.addEventListener('mouseup', () => {
+  if (FS.pointing) { FS.pointing = false; }
+  if (FS.drag === 'fill') fFillApply();
+  FS.drag = null;
+});
+fGrid.addEventListener('dblclick', e => { const td = e.target.closest('td[data-r]'); if (td && !FS.editing) { fGo(+td.dataset.r, +td.dataset.c); fStartEdit('', true); } });
+
+/* Poignée de recopie (comme dans Excel) */
+FS.fill = null;
+$('#fFill').addEventListener('mousedown', e => { e.preventDefault(); e.stopPropagation(); FS.drag = 'fill'; FS.fill = { src: fSel(), to: null }; });
+function fFillPreview(r, c) {
+  const s = FS.fill.src; fGrid.querySelectorAll('.fillprev').forEach(x => x.classList.remove('fillprev'));
+  let to; if (r > s.r1) to = { r0: s.r1 + 1, r1: r, c0: s.c0, c1: s.c1, axis: 'r' }; else if (c > s.c1) to = { r0: s.r0, r1: s.r1, c0: s.c1 + 1, c1: c, axis: 'c' }; else to = null;
+  FS.fill.to = to; if (!to) return;
+  for (let rr = to.r0; rr <= to.r1; rr++) for (let cc = to.c0; cc <= to.c1; cc++) FS.tds[rr][cc].classList.add('fillprev');
+}
+function fFillApply() {
+  fGrid.querySelectorAll('.fillprev').forEach(x => x.classList.remove('fillprev'));
+  const F = FS.fill; FS.fill = null; if (!F || !F.to) return; const s = F.src, t = F.to;
+  fChange(() => {
+    for (let r = t.r0; r <= t.r1; r++) for (let c = t.c0; c <= t.c1; c++) {
+      const sr = t.axis === 'r' ? s.r0 + ((r - s.r0) % (s.r1 - s.r0 + 1)) : r, sc = t.axis === 'c' ? s.c0 + ((c - s.c0) % (s.c1 - s.c0 + 1)) : c;
+      const src = FS.cur.cells[keyOf(sr, sc)];
+      let raw = src ? src.v || '' : '';
+      // série numérique simple : deux nombres au départ → on prolonge l'écart
+      if (t.axis === 'r' && s.r1 > s.r0) { const a = parseCellNumber(fRaw(s.r0, c)), b = parseCellNumber(fRaw(s.r0 + 1, c)); if (a != null && b != null && fRaw(s.r0, c)[0] !== '=') raw = String(round2(a + (b - a) * (r - s.r0))).replace('.', ','); else raw = fShiftRefs(raw, r - sr, 0); }
+      else raw = fShiftRefs(raw, r - sr, c - sc);
+      fSetRaw(r, c, raw); const k = keyOf(r, c); if (src && src.s) { (FS.cur.cells[k] || (FS.cur.cells[k] = {})).s = { ...src.s }; }
+    }
+  });
+  FS.anchor = { r: s.r0, c: s.c0 }; FS.act = { r: t.r1 > s.r1 ? t.r1 : s.r1, c: t.c1 > s.c1 ? t.c1 : s.c1 }; fPaintSel();
+}
+
+/* Largeur des colonnes */
+fGrid.addEventListener('pointerdown', e => {
+  const h = e.target.closest('.rs'); if (!h) return; e.preventDefault(); e.stopPropagation();
+  const c = +h.dataset.rc, col = fGrid.querySelectorAll('col')[c + 1]; const x0 = e.clientX, w0 = FS.cur.colW[c] || F_DEFW;
+  const before = fSnapshot(); h.setPointerCapture(e.pointerId);
+  const mv = ev => { const w = Math.max(30, Math.round(w0 + ev.clientX - x0)); FS.cur.colW[c] = w; col.style.width = w + 'px';
+    fGrid.style.width = 46 + Array.from({ length: FS.cur.nCols }, (_, k) => FS.cur.colW[k] || F_DEFW).reduce((a, b) => a + b, 0) + 'px'; };
+  const up = () => { h.removeEventListener('pointermove', mv); FS.undo.push(before); freeMarkDirty(); fPaintSel(); };
+  h.addEventListener('pointermove', mv); h.addEventListener('pointerup', up, { once: true });
+});
+fGrid.addEventListener('dblclick', e => { const h = e.target.closest('.rs'); if (!h) return; e.stopPropagation(); const c = +h.dataset.rc; fChange(() => { delete FS.cur.colW[c]; }, true); });
+
+/* ---------- Clavier ---------- */
+fKey.addEventListener('keydown', e => {
+  if (!FS.cur) return;
+  const mod = e.ctrlKey || e.metaKey; const { r, c } = FS.act;
+  const mv = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1] }[e.key];
+  if (mv) { e.preventDefault(); if (mod) { const d = FS.cur; fGo(mv[0] ? (mv[0] > 0 ? d.nRows - 1 : 0) : r, mv[1] ? (mv[1] > 0 ? d.nCols - 1 : 0) : c, e.shiftKey); } else fGo(r + mv[0], c + mv[1], e.shiftKey); return; }
+  if (e.key === 'Enter') { e.preventDefault(); fGo(r + (e.shiftKey ? -1 : 1), c); return; }
+  if (e.key === 'Tab') { e.preventDefault(); fGo(r, c + (e.shiftKey ? -1 : 1)); return; }
+  if (e.key === 'F2') { e.preventDefault(); fStartEdit('', true); return; }
+  if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); fClearSel(); return; }
+  if (e.key === 'Home') { e.preventDefault(); fGo(mod ? 0 : r, 0, e.shiftKey); return; }
+  if (e.key === 'PageDown' || e.key === 'PageUp') { e.preventDefault(); fGo(r + (e.key === 'PageDown' ? 20 : -20), c, e.shiftKey); return; }
+  if (mod) {
+    const k = e.key.toLowerCase();
+    if (k === 'z') { e.preventDefault(); e.stopPropagation(); if (e.shiftKey) fRedo(); else fUndo(); return; }
+    if (k === 'y') { e.preventDefault(); e.stopPropagation(); fRedo(); return; }
+    if (k === 'b' || k === 'g') { e.preventDefault(); e.stopPropagation(); fToggle('b'); return; }
+    if (k === 'i') { e.preventDefault(); e.stopPropagation(); fToggle('i'); return; }
+    if (k === 'a') { e.preventDefault(); FS.anchor = { r: 0, c: 0 }; FS.act = { r: FS.cur.nRows - 1, c: FS.cur.nCols - 1 }; fPaintSel(); return; }
+    if (k === 'd' || k === 'r') { e.preventDefault(); e.stopPropagation(); fFillDir(k === 'd' ? 'r' : 'c'); return; }
+    return;
+  }
+  if (e.key === 'Escape') return;
+  if (e.key.length === 1 && !e.altKey) { e.preventDefault(); fStartEdit(e.key); }
+});
+fKey.addEventListener('copy', e => { if (!FS.cur) return; e.preventDefault(); e.clipboardData.setData('text/plain', fCopyText()); });
+fKey.addEventListener('cut', e => { if (!FS.cur) return; e.preventDefault(); e.clipboardData.setData('text/plain', fCopyText()); FS.clip.cut = true; fClearSel(); });
+fKey.addEventListener('paste', e => { if (!FS.cur) return; e.preventDefault(); fPaste((e.clipboardData || window.clipboardData).getData('text/plain') || ''); });
+function fCopyText() {
+  const s = fSel(); const rows = [];
+  for (let r = s.r0; r <= s.r1; r++) { const row = []; for (let c = s.c0; c <= s.c1; c++) { const v = FS.vals.get(r, c); row.push(v == null ? '' : (typeof v === 'number' ? String(v).replace('.', ',') : fDisplay(v, {}))); } rows.push(row.join('\t')); }
+  const text = rows.join('\n');
+  const raws = []; for (let r = s.r0; r <= s.r1; r++) { const row = []; for (let c = s.c0; c <= s.c1; c++) { const x = FS.cur.cells[keyOf(r, c)]; row.push(x ? clone(x) : null); } raws.push(row); }
+  FS.clip = { text, raws, r0: s.r0, c0: s.c0 }; return text;
+}
+function fPaste(text) {
+  const { r, c } = FS.act; const internal = FS.clip && FS.clip.text === text.replace(/\r/g, '').replace(/\n$/, '');
+  fChange(() => {
+    if (internal) {
+      const C = FS.clip;
+      C.raws.forEach((row, i) => row.forEach((x, j) => {
+        const rr = r + i, cc = c + j; if (rr >= FS.cur.nRows || cc >= FS.cur.nCols) return; const k = keyOf(rr, cc);
+        if (!x) { delete FS.cur.cells[k]; return; }
+        const y = clone(x); if (y.v) y.v = fShiftRefs(y.v, rr - (C.r0 + i), cc - (C.c0 + j)); FS.cur.cells[k] = y;
+      }));
+    } else {
+      const rows = text.replace(/\r/g, '').replace(/\n$/, '').split('\n').map(l => l.split('\t'));
+      const need = r + rows.length; if (need > FS.cur.nRows) FS.cur.nRows = need;
+      const needC = c + Math.max(...rows.map(x => x.length)); if (needC > FS.cur.nCols) FS.cur.nCols = needC;
+      rows.forEach((row, i) => row.forEach((v, j) => fSetRaw(r + i, c + j, v.trim())));
+    }
+  }, true);
+  if (FS.clip && FS.clip.cut && internal) { FS.clip = null; }
+}
+function fToggle(p) { const on = !fStyle(FS.act.r, FS.act.c)[p]; fStyleSel(s => { s[p] = on ? 1 : 0; }); }
+function fFillDir(axis) {
+  const s = fSel(); if (axis === 'r' ? s.r1 === s.r0 : s.c1 === s.c0) return;
+  FS.fill = { src: axis === 'r' ? { ...s, r1: s.r0 } : { ...s, c1: s.c0 }, to: axis === 'r' ? { r0: s.r0 + 1, r1: s.r1, c0: s.c0, c1: s.c1, axis: 'r' } : { r0: s.r0, r1: s.r1, c0: s.c0 + 1, c1: s.c1, axis: 'c' } };
+  fFillApply();
+}
+/* Insertion / suppression de lignes et colonnes */
+function fStructure(axis, at, delta) {
+  fChange(() => {
+    const out = {};
+    Object.entries(FS.cur.cells).forEach(([k, x]) => {
+      const p = parseKey(k); let i = axis === 'r' ? p.r : p.c;
+      if (delta < 0 && i >= at && i < at - delta) return;
+      if (i >= at) i += delta;
+      const nk = axis === 'r' ? keyOf(i, p.c) : keyOf(p.r, i);
+      const y = { ...x }; if (y.v) y.v = fMoveRefs(y.v, axis, at, delta); out[nk] = y;
+    });
+    FS.cur.cells = out;
+    if (axis === 'r') FS.cur.nRows = Math.max(1, FS.cur.nRows + delta);
+    else { FS.cur.nCols = Math.max(1, FS.cur.nCols + delta);
+      const w = {}; Object.entries(FS.cur.colW).forEach(([c, v]) => { let i = +c; if (delta < 0 && i >= at && i < at - delta) return; if (i >= at) i += delta; w[i] = v; }); FS.cur.colW = w; }
+  }, true);
+  fGo(Math.min(FS.act.r, FS.cur.nRows - 1), Math.min(FS.act.c, FS.cur.nCols - 1));
+}
+function fAutoSum() {
+  const { r, c } = FS.act; let r0 = r - 1; while (r0 >= 0 && typeof FS.vals.get(r0, c) === 'number') r0--;
+  if (r0 === r - 1) { fStartEdit('=SOMME()'); fEdit.setSelectionRange(7, 7); return; }
+  fChange(() => fSetRaw(r, c, `=SOMME(${keyOf(r0 + 1, c)}:${keyOf(r - 1, c)})`)); fGo(r + 1, c); fFocus();
+}
+
+/* ---------- Barre d'outils ---------- */
+$('#freeMain').addEventListener('click', e => {
+  const b = e.target.closest('[data-fx]'); if (!b || !FS.cur) return; const a = b.dataset.fx;
+  if (a === 'b' || a === 'i') fToggle(a);
+  else if (a === 'undo') fUndo(); else if (a === 'redo') fRedo();
+  else if (a === 'sum') { fAutoSum(); return; }
+  else if (a.startsWith('al-')) { const v = a.slice(3); const cur = fStyle(FS.act.r, FS.act.c).al; fStyleSel(s => { s.al = cur === v ? '' : v; }); }
+  else if (a.startsWith('bg-')) { const v = a.slice(3); fStyleSel(s => { s.bg = v === 'none' ? '' : v; }); }
+  else if (a === 'row-ins') { closeMenus(); fStructure('r', fSel().r0, 1); }
+  else if (a === 'row-del') { closeMenus(); const s = fSel(); fStructure('r', s.r0, -(s.r1 - s.r0 + 1)); }
+  else if (a === 'col-ins') { closeMenus(); fStructure('c', fSel().c0, 1); }
+  else if (a === 'col-del') { closeMenus(); const s = fSel(); fStructure('c', s.c0, -(s.c1 - s.c0 + 1)); }
+  else if (a === 'rows50') { closeMenus(); fChange(() => { FS.cur.nRows += 50; }, true); }
+  else if (a === 'cols5') { closeMenus(); fChange(() => { FS.cur.nCols += 5; }, true); }
+  else if (a === 'clearfmt') { closeMenus(); const s = fSel(); fChange(() => { for (let r = s.r0; r <= s.r1; r++) for (let c = s.c0; c <= s.c1; c++) { const k = keyOf(r, c), x = FS.cur.cells[k]; if (x) { delete x.s; if (x.v == null || x.v === '') delete FS.cur.cells[k]; } } }); }
+  fFocus();
+});
+$('#fFmt').addEventListener('change', e => { const v = e.target.value; fStyleSel(s => { s.f = v; }); fFocus(); });
+$('#fStruct').addEventListener('click', e => { e.stopPropagation(); toggleMenu(e.currentTarget, $('#fStructMenu')); });
+$('#fName').addEventListener('input', e => { FS.cur.name = e.target.value; freeMarkDirty(); });
+$('#fName').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); fFocus(); } });
+$('#fSide').addEventListener('click', () => $('#app').classList.toggle('side-open'));
+$('#fMore').addEventListener('click', e => { e.stopPropagation(); toggleMenu(e.currentTarget, $('#fMoreMenu')); });
+$('#fMoreMenu').addEventListener('click', e => { const b = e.target.closest('[data-fmore]'); if (!b) return; if (b.dataset.fmore === 'dup') freeDuplicate(); else if (b.dataset.fmore === 'del') freeDelete(); else if (b.dataset.fmore === 'help') { closeMenus(); freeHelp(); } });
+$('#fExport').addEventListener('click', async () => {
+  await freeFlush(); toast('Préparation du fichier Excel…');
+  try { await saveFile(fileBase({ name: FS.cur.name || 'Feuille' }) + '.xlsx', await xWorkbook([{ type: 'free', doc: freeSerialize(FS.cur) }])); }
+  catch (e) { console.error(e); toast(xlLoadError(e) ? "Le module Excel n'a pas pu se charger. Vérifiez votre connexion puis réessayez." : "L'export a échoué. Réessayez."); }
+});
+['pointerenter', 'focus'].forEach(ev => $('#fExport').addEventListener(ev, () => { loadExcel().catch(() => {}); }, { once: true }));
+function freeHelp() {
+  openModal(`<h3>Feuille libre : mode d'emploi</h3>
+  <dl class="keys">
+    <dt>Saisir</dt><dd>Tapez directement dans la cellule sélectionnée, puis Entrée (descend) ou Tab (va à droite). F2 ou double-clic pour modifier.</dd>
+    <dt>Formules</dt><dd>Commencez par <span class="mono">=</span> : <span class="mono">=A1*20%</span>, <span class="mono">=SOMME(B2:B10)</span>. Pendant la saisie, cliquez une cellule (ou glissez sur une plage) pour insérer sa référence. <span class="mono">$A$1</span> fixe une référence.</dd>
+    <dt>Fonctions</dt><dd>SOMME, MOYENNE, MIN, MAX, NB, NBVAL, ARRONDI, ARRONDI.SUP, ARRONDI.INF, ENT, ABS, SI, ET, OU, NON, SIERREUR, SOMME.SI, NB.SI, PRODUIT, PUISSANCE, RACINE, MOD, VPM, CONCATENER (noms anglais acceptés aussi). Séparateur : <span class="mono">;</span></dd>
+    <dt>Sélection</dt><dd>Glisser la souris, ou Maj + flèches. Cliquez un numéro de ligne ou une lettre de colonne pour la sélectionner entière. La somme, la moyenne et le nombre de valeurs s'affichent à droite de la barre de formule.</dd>
+    <dt>Recopier</dt><dd>Faites glisser le petit carré en bas à droite de la sélection : les références des formules s'adaptent. Ctrl+D recopie vers le bas, Ctrl+R vers la droite.</dd>
+    <dt><kbd>Ctrl</kbd>+<kbd>C</kbd> / <kbd>X</kbd> / <kbd>V</kbd></dt><dd>Copier, couper, coller (y compris depuis Excel).</dd>
+    <dt><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Y</kbd></dt><dd>Annuler, rétablir.</dd>
+    <dt><kbd>Ctrl</kbd>+<kbd>B</kbd> / <kbd>I</kbd></dt><dd>Gras, italique.</dd>
+    <dt>Colonnes</dt><dd>Glissez le bord d'une lettre de colonne pour l'élargir ; double-clic pour revenir à la largeur d'origine. Le menu « Lignes et colonnes » insère ou supprime.</dd>
+  </dl>
+  <div class="btns"><button type="button" class="btn primary" data-close>Compris</button></div>`);
+}
+
+/* ---------- Export Excel de la feuille libre ---------- */
+function xFreeSheet(wb, f, ctx) {
+  f = freeNormalize(clone(f)); const E = fEvalSheet(f);
+  const ws = wb.addWorksheet(xSheetName(ctx, f.name || 'Feuille'), { properties: { tabColor: { argb: 'FF8A94A6' } } });
+  let maxC = 0; Object.keys(f.cells).forEach(k => { const p = parseKey(k); if (p) maxC = Math.max(maxC, p.c); });
+  for (let c = 0; c <= Math.max(maxC, 5); c++) ws.getColumn(c + 1).width = Math.max(4, Math.round((f.colW[c] || F_DEFW) / 7));
+  const FMT = { num: '#,##0.00', int: '#,##0', eur: '#,##0.00 "€"', pct: '0.00%' };
+  const BG = { yellow: 'FFFFF4C2', blue: 'FFDDE8F7', green: 'FFDDF0E1', red: 'FFF9DEDC', gray: 'FFECEEF2' };
+  Object.entries(f.cells).forEach(([k, x]) => {
+    const p = parseKey(k); if (!p) return; const cell = ws.getCell(p.r + 1, p.c + 1); const raw = x.v; const st = x.s || {};
+    if (raw != null && raw !== '') {
+      if (raw[0] === '=') { const v = E.get(p.r, p.c); cell.value = { formula: fToExcel(raw), result: isErr(v) || v == null ? undefined : v }; }
+      else { const n = parseCellNumber(raw); cell.value = n != null ? n : raw; }
+    }
+    cell.font = xFont({ size: 11, bold: !!st.b, italic: !!st.i });
+    if (st.al) cell.alignment = { horizontal: st.al };
+    if (st.f && FMT[st.f]) cell.numFmt = FMT[st.f];
+    if (st.bg && BG[st.bg]) cell.fill = xFill(BG[st.bg]);
+  });
+  xPrint(ws, f.name || 'Feuille');
+}
+
+/* ================= Dossiers de travail (classeurs à plusieurs feuilles) ================= */
+const SHEET_TYPES = {
+  bdx: { label: 'Bordereau de saisie', icon: '<path d="M2.5 4h11M2.5 8h11M2.5 12h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/>' },
+  amo: { label: "Tableau d'amortissement", icon: '<path d="M2.5 13.5h11M4 11V4.5M8 11V7M12 11V9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/>' },
+  free: { label: 'Feuille libre', icon: '<path d="M2.5 2.5h11v11h-11zM2.5 6.5h11M2.5 10h11M6.5 2.5v11" stroke="currentColor" stroke-width="1.3" fill="none"/>' },
+};
+const W = {
+  list: new Map(), state: 'loading', cur: null, inited: false, t: null,
+  doc(s) {
+    if (s.type === 'bdx') return S.cur && S.cur.id === s.id ? S.cur : S.list.get(s.id);
+    if (s.type === 'amo') return AS.cur && AS.cur.id === s.id ? AS.cur : AS.list.get(s.id);
+    return FS.cur && FS.cur.id === s.id ? FS.cur : FS.list.get(s.id);
+  },
+  updated(d) { let u = d.updatedAt || 0; (d.sheets || []).forEach(s => { const x = this.doc(s); if (x && (x.updatedAt || 0) > u) u = x.updatedAt; }); return u; },
+  sorted() { return [...this.list.values()].map(d => (this.cur && d.id === this.cur.id ? this.cur : d)).sort((a, b) => this.updated(b) - this.updated(a)); },
+  saveSoon() { clearTimeout(this.t); this.t = setTimeout(() => this.save(), 500); },
+  async save(d = this.cur) {
+    if (!d) return; clearTimeout(this.t); d.updatedAt = d.updatedAt || Date.now();
+    const doc = { id: d.id, kind: 'dossier', name: d.name || 'Sans titre', sheets: d.sheets.map(s => ({ id: s.id, type: s.type })), active: d.active || null, createdAt: d.createdAt, updatedAt: d.updatedAt };
+    this.list.set(doc.id, doc);
+    try { await store.saveGeneric('dossiers', doc); } catch (e) { toast("Le dossier n'a pas pu être enregistré. Réessayez dans un instant."); }
+  },
+  async addSheet(type, id) {
+    if (!this.cur) return;
+    const k = this.cur.sheets.findIndex(s => s.id === this.cur.active);
+    this.cur.sheets.splice(k < 0 ? this.cur.sheets.length : k + 1, 0, { id, type });
+    this.cur.active = id; this.cur.updatedAt = Date.now(); await this.save();
+    setView(type); renderTabs(); renderList();
+  },
+  async removeSheet(id) {
+    if (!this.cur) return; const k = this.cur.sheets.findIndex(s => s.id === id); if (k < 0) return;
+    this.cur.sheets.splice(k, 1); this.cur.updatedAt = Date.now();
+    const next = this.cur.sheets[Math.min(k, this.cur.sheets.length - 1)];
+    this.cur.active = next ? next.id : null; await this.save();
+    if (next) await wsShow(next.id); else { setView('empty'); renderTabs(); }
+    renderList();
+  },
+};
+async function flushAll() { try { await flushSave(); } catch (e) {} try { await amoFlush(); } catch (e) {} try { await freeFlush(); } catch (e) {} }
+function wsReady(which, map, state) {
+  if (which === 'dossiers') { W.list = map; W.state = state; }
+  else { map.forEach((v, k) => FS.list.set(k, v)); FS.state = state; }
+  wsMaybeInit(); if (W.inited) renderList();
+}
+function wsMaybeInit() {
+  if (W.inited) return;
+  if ([S.listState, AS.listState, W.state, FS.state].some(x => x === 'loading' || x === 'slow')) return;
+  W.inited = true; wsInit().catch(e => { console.error(e); $('#wsLoading').hidden = true; toast('Vos dossiers n’ont pas pu être chargés complètement.'); });
+}
+async function wsInit() {
+  const used = new Set(); W.list.forEach(d => (d.sheets || []).forEach(s => used.add(s.id)));
+  const orph = [
+    ...[...S.list.values()].map(d => ({ id: d.id, type: 'bdx', u: d.updatedAt })),
+    ...[...AS.list.values()].map(d => ({ id: d.id, type: 'amo', u: d.updatedAt })),
+    ...[...FS.list.values()].map(d => ({ id: d.id, type: 'free', u: d.updatedAt })),
+  ].filter(x => !used.has(x.id)).sort((a, b) => (a.u || 0) - (b.u || 0));
+  if (orph.length) await wsCreate(W.list.size ? 'Documents retrouvés' : 'Mes documents', orph.map(x => ({ id: x.id, type: x.type })), false);
+  else if (!W.list.size) await wsCreateExample();
+  // feuilles disparues (supprimées ailleurs) : on les retire des dossiers
+  for (const d of W.list.values()) {
+    const keep = (d.sheets || []).filter(s => W.doc(s)); if (keep.length !== (d.sheets || []).length) { d.sheets = keep; if (!keep.find(s => s.id === d.active)) d.active = keep[0] ? keep[0].id : null; await W.save(d); }
+  }
+  $('#wsLoading').hidden = true;
+  const first = W.sorted()[0]; if (first) await wsOpen(first.id);
+}
+async function wsCreate(name, sheets, open = true) {
+  const d = { id: uid(), kind: 'dossier', name, sheets: sheets || [], active: sheets && sheets[0] ? sheets[0].id : null, createdAt: Date.now(), updatedAt: Date.now() };
+  W.list.set(d.id, d); await W.save(d); if (open) await wsOpen(d.id); return d;
+}
+async function wsCreateExample() {
+  const b = exampleBordereau(); b.id = uid(); b.example = false; b.updatedAt = Date.now();
+  const used = EXAMPLE_TIERS.filter(t => !(S.profile.tiers || []).some(x => x.n === t.n)); if (used.length) { S.profile.tiers.push(...used.map(t => ({ ...t }))); saveProfile(); }
+  const a = amoExample(); a.id = uid(); a.example = false; a.updatedAt = Date.now();
+  const f = freeExample();
+  const sb = serialize(b), sa = amoSerialize(a), sf = freeSerialize(f);
+  await store.saveBordereau(sb); S.list.set(sb.id, sb);
+  await store.saveImmo(sa); AS.list.set(sa.id, sa);
+  await store.saveGeneric('feuilles', sf); FS.list.set(sf.id, sf);
+  await wsCreate('Exemple · dossier de démonstration', [{ id: sb.id, type: 'bdx' }, { id: sa.id, type: 'amo' }, { id: sf.id, type: 'free' }], false);
+}
+async function wsOpen(id) {
+  await flushAll();
+  const d = W.list.get(id); if (!d) return;
+  W.cur = { ...clone(d), sheets: (d.sheets || []).map(s => ({ ...s })) };
+  const target = W.cur.sheets.find(s => s.id === W.cur.active) || W.cur.sheets[0];
+  if (target) await wsShow(target.id); else { setView('empty'); renderTabs(); }
+  renderList(); $('#app').classList.remove('side-open');
+}
+async function wsShow(id) {
+  const sh = W.cur && W.cur.sheets.find(s => s.id === id); if (!sh) return;
+  await flushAll();
+  if (sh.type === 'bdx') { if (!S.cur || S.cur.id !== id) await openBordereau(id); }
+  else if (sh.type === 'amo') { if (!AS.cur || AS.cur.id !== id) await amoOpen(id); }
+  else { if (!FS.cur || FS.cur.id !== id) await freeOpen(id); }
+  setView(sh.type);
+  if (W.cur.active !== id) { W.cur.active = id; W.saveSoon(); }
+  renderTabs();
+  if (sh.type === 'free') { requestAnimationFrame(() => { fPaintSel(); fFocus(); }); }
+}
+function renderTabs() {
+  const el = $('#tabsList');
+  if (!W.cur) { el.innerHTML = ''; $('#dName').value = ''; return; }
+  if (document.activeElement?.id !== 'dName') $('#dName').value = W.cur.name || '';
+  el.innerHTML = W.cur.sheets.map(s => {
+    const d = W.doc(s); const T = SHEET_TYPES[s.type];
+    return `<div class="stab${s.id === W.cur.active ? ' on' : ''}" role="tab" aria-selected="${s.id === W.cur.active}" data-sid="${esc(s.id)}" tabindex="0" title="${esc(T.label)} · double-clic pour renommer">
+      <svg viewBox="0 0 16 16" aria-hidden="true">${T.icon}</svg><span class="nm">${esc((d && d.name) || 'Sans titre')}</span>
+      <button type="button" class="sx" data-sdel="${esc(s.id)}" aria-label="Supprimer la feuille" title="Supprimer la feuille">×</button></div>`;
+  }).join('');
+  const on = el.querySelector('.stab.on'); if (on) on.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+}
+$('#tabsList').addEventListener('click', async e => {
+  const del = e.target.closest('[data-sdel]');
+  if (del) { e.stopPropagation(); const id = del.dataset.sdel; await wsShow(id); const sh = W.cur.sheets.find(s => s.id === id); if (!sh) return;
+    if (sh.type === 'bdx') deleteBordereau(); else if (sh.type === 'amo') amoDelete(); else freeDelete(); return; }
+  const t = e.target.closest('[data-sid]'); if (t && !e.target.closest('input')) wsShow(t.dataset.sid);
+});
+$('#tabsList').addEventListener('keydown', e => { const t = e.target.closest('[data-sid]'); if (t && (e.key === 'Enter' || e.key === ' ') && e.target === t) { e.preventDefault(); wsShow(t.dataset.sid); } });
+$('#tabsList').addEventListener('dblclick', e => {
+  const t = e.target.closest('[data-sid]'); if (!t || e.target.closest('[data-sdel]')) return;
+  const sh = W.cur.sheets.find(s => s.id === t.dataset.sid); if (!sh) return;
+  const span = t.querySelector('.nm'); const inp = document.createElement('input'); inp.className = 'stab-in'; inp.value = span.textContent; inp.setAttribute('aria-label', 'Nom de la feuille');
+  span.replaceWith(inp); inp.focus(); inp.select();
+  const done = ok => {
+    if (!inp.isConnected) return; const v = inp.value.trim();
+    if (ok && v) { const field = sh.type === 'bdx' ? '#bName' : sh.type === 'amo' ? '#aName' : '#fName'; const f = $(field); f.value = v; f.dispatchEvent(new Event('input', { bubbles: true })); }
+    renderTabs();
+  };
+  inp.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); done(true); } if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); done(false); } });
+  inp.addEventListener('blur', () => done(true));
+});
+$('#dName').addEventListener('input', e => { if (!W.cur) return; W.cur.name = e.target.value; W.cur.updatedAt = Date.now(); W.saveSoon(); renderList(); });
+$('#dName').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); } });
+$('#addSheet').addEventListener('click', e => { e.stopPropagation(); toggleMenu(e.currentTarget, $('#addSheetMenu')); });
+document.addEventListener('click', e => { const b = e.target.closest('[data-new]'); if (!b) return; closeMenus(); newSheet(b.dataset.new); });
+async function newSheet(type) {
+  if (!W.cur) await wsCreate('Nouveau dossier', []);
+  if (type === 'bdx') newBordereauDialog();
+  else if (type === 'amo') { await amoNew(); }
+  else { const id = await freeCreate(nextFreeName()); await W.addSheet('free', id); requestAnimationFrame(() => { fPaintSel(); fFocus(); }); }
+}
+function nextFreeName() { const n = W.cur ? W.cur.sheets.filter(s => s.type === 'free').length + 1 : 1; return n > 1 ? `Feuille ${n}` : 'Feuille 1'; }
+$('#exportDossier').addEventListener('click', exportDossier);
+['pointerenter', 'focus'].forEach(ev => $('#exportDossier').addEventListener(ev, () => { loadExcel().catch(() => {}); }, { once: true }));
+async function exportDossier() {
+  if (!W.cur || !W.cur.sheets.length) { toast('Ce dossier ne contient aucune feuille à exporter.'); return; }
+  await flushAll(); toast('Préparation du fichier Excel…');
+  const items = W.cur.sheets.map(s => {
+    const d = W.doc(s); if (!d) return null;
+    if (s.type === 'bdx') return { type: 'bdx', doc: S.cur && S.cur.id === s.id ? serialize(S.cur) : d };
+    if (s.type === 'amo') return { type: 'amo', doc: AS.cur && AS.cur.id === s.id ? amoSerialize(AS.cur) : d };
+    return { type: 'free', doc: FS.cur && FS.cur.id === s.id ? freeSerialize(FS.cur) : d };
+  }).filter(Boolean);
+  try { await saveFile(fileBase({ name: W.cur.name || 'Dossier' }) + '.xlsx', await xWorkbook(items)); }
+  catch (e) { console.error(e); toast(xlLoadError(e) ? "Le module Excel n'a pas pu se charger. Vérifiez votre connexion puis réessayez." : "L'export a échoué. Réessayez."); }
+}
+function newDossierDialog() {
+  closeMenus();
+  openModal(`<h3>Nouveau dossier de travail</h3>
+    <form id="ndForm" style="display:flex;flex-direction:column;gap:12px" autocomplete="off">
+      <label class="field">Nom du dossier<input id="ndName" value="Dossier ${esc(monthLabel(thisMonth()).toLowerCase())}" autofocus></label>
+      <fieldset class="ndtypes"><legend>Première feuille</legend>
+        ${Object.entries(SHEET_TYPES).map(([k, T], i) => `<label class="ndt"><input type="radio" name="ndType" value="${k}"${i === 0 ? ' checked' : ''}><svg viewBox="0 0 16 16" aria-hidden="true">${T.icon}</svg><span>${T.label}</span></label>`).join('')}
+      </fieldset>
+      <p style="font-size:12px">Comme un classeur Excel : vous pourrez ajouter d'autres feuilles avec le bouton « + Feuille » en bas de l'écran.</p>
+      <div class="btns"><button type="button" class="btn" data-close>Annuler</button><button type="submit" class="btn primary">Créer le dossier</button></div>
+    </form>`);
+  $('#ndName').select();
+  $('#ndForm').addEventListener('submit', async ev => {
+    ev.preventDefault(); const name = $('#ndName').value.trim() || 'Nouveau dossier'; const type = (document.querySelector('input[name="ndType"]:checked') || {}).value || 'bdx';
+    closeModal(); await flushAll(); await wsCreate(name, []);
+    if (type === 'bdx') await createBordereauSheet({ name: 'Bordereau ' + monthLabel(thisMonth()).toLowerCase(), period: thisMonth(), company: '' });
+    else newSheet(type);
+  });
+}
+async function createBordereauSheet({ name, period, company }) {
+  await flushSave();
+  S.cur = { id: uid(), name, company: company || '', period, lines: [newLine(uid(), { j: '' })], createdAt: Date.now(), updatedAt: Date.now() };
+  S.undo = null; renderAll(); markDirty(); await saveNow();
+  await W.addSheet('bdx', S.cur.id);
+  $('#app').classList.remove('side-open'); focusCell(0, 'date');
+}
+async function deleteDossier(id) {
+  const d = W.list.get(id); if (!d) return; const n = (d.sheets || []).length;
+  const ok = await confirmBox(`Supprimer le dossier « ${esc(d.name)} » ?`, `Ses ${plural(n, 'feuille', 'feuilles')} seront définitivement effacées. Pensez à l'exporter avant si besoin.`, 'Supprimer le dossier', true);
+  if (!ok) return;
+  await flushAll();
+  try {
+    for (const s of d.sheets || []) {
+      if (s.type === 'bdx') { await store.deleteBordereau(s.id); S.list.delete(s.id); if (S.cur && S.cur.id === s.id) S.dirty = false; }
+      else if (s.type === 'amo') { await store.deleteImmo(s.id); AS.list.delete(s.id); if (AS.cur && AS.cur.id === s.id) AS.dirty = false; }
+      else { await store.deleteGeneric('feuilles', s.id); FS.list.delete(s.id); if (FS.cur && FS.cur.id === s.id) { FS.dirty = false; FS.cur = null; } }
+    }
+    await store.deleteGeneric('dossiers', id); W.list.delete(id);
+  } catch (e) { toast('Suppression impossible pour le moment.'); return; }
+  if (W.cur && W.cur.id === id) { W.cur = null; const next = W.sorted()[0]; if (next) await wsOpen(next.id); else await wsCreate('Nouveau dossier', []); }
+  renderList(); toast('Dossier supprimé');
+}
+function renderDossiers() {
+  const ul = $('#blist'); const items = W.sorted();
+  if (!W.inited) { ul.innerHTML = '<li class="side-empty">Chargement de vos dossiers…</li>'; return; }
+  ul.innerHTML = items.map(d => {
+    const n = (d.sheets || []).length, u = W.updated(d);
+    return `<li class="ditem"><button type="button" class="bitem" data-dopen="${esc(d.id)}" aria-current="${!!(W.cur && W.cur.id === d.id)}">
+      <span class="nm">${esc(d.name || 'Sans titre')}</span>
+      <span class="mt">${plural(n, 'feuille', 'feuilles')}${u ? ` · modifié ${rel(u)}` : ''}</span></button>
+      <button type="button" class="ddel" data-ddel="${esc(d.id)}" aria-label="Supprimer le dossier ${esc(d.name || '')}" title="Supprimer le dossier">×</button></li>`;
+  }).join('') || '<li class="side-empty">Aucun dossier. Créez-en un avec le bouton ci-dessus.</li>';
+}
+$('#blist').addEventListener('click', e => {
+  const del = e.target.closest('[data-ddel]'); if (del) { e.stopPropagation(); deleteDossier(del.dataset.ddel); return; }
+  const o = e.target.closest('[data-dopen]'); if (o) { if (!W.cur || o.dataset.dopen !== W.cur.id) wsOpen(o.dataset.dopen); else $('#app').classList.remove('side-open'); }
+}, true);
+
 /* ================= Démarrage ================= */
 rebuildAccounts();
-S.view = 'bdx';
+S.view = 'bdx'; S.initialDone = true;
 S.cur = exampleBordereau();
 applyAuto();
 renderAll();
-AS.cur = amoExample();
+AS.cur = amoExample(); AS.initialDone = true;
 amoRenderAll();
-{ let v = null; try { v = localStorage.getItem(VIEW_KEY); } catch (e) {} setView(v === 'amo' ? 'amo' : 'bdx', false); }
-store.init().catch(() => { S.mode = 'local'; renderStoreNote(); store.watchList(); store.watchImmos(); });
+setView('bdx');
+store.init().catch(() => { S.mode = 'local'; renderStoreNote(); store.watchList(); store.watchImmos(); store.watchGeneric('dossiers'); store.watchGeneric('feuilles'); });
 })();
 </script>
